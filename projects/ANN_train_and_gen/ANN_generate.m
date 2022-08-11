@@ -13,7 +13,7 @@ if(gen_new_data ==1)
 
     inputs = scaling_simple(inputs_unscaled);%samples form log(v) space, then scales values in physical ranges 
     
-    % order v1 and v2
+    % order v1
     for i = 1:no_samples
         [inputs(i,1),inputs(i,2)] = order_v1v2(inputs(i,1:2));
     end
