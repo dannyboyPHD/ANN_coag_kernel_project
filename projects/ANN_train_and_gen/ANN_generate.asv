@@ -70,17 +70,15 @@ load_curr_net = 1;
 
 if(load_curr_net == 0)
     %hard code the net you want to write into fortran
-    name = 'best';
-    net = load(strcat('./trained_nets/',name,'.mat'));
-    net = net.net;% fixes annoying object structure when read in
+    archive_net_name = 'best.mat';
+    net = load(archive_net_name);
 elseif(load_curr_net == 1)
     name = net_name;
     net = load(strcat('./trained_nets/',name));
-    net = net.net;% fixes annoying object structure when read in
 end
 
 
-write2fortranV2(net,name,write_flag);
+
 
 
 

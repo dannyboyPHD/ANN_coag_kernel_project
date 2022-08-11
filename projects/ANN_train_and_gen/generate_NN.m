@@ -1,4 +1,4 @@
-function [] = generate_NN(x,t,arch_nn,name,max_epochs)
+function [new_name] = generate_NN(x,t,arch_nn,name,max_epochs)
 
 
 x = x';
@@ -58,11 +58,8 @@ for i = 1:length(arch_nn)
 end
 n_out = num2str(net.outputs{net.numLayers}.size);
 a = strcat(a,':',n_out);
-
+new_name = strcat(name,'_',a);
 save(strcat('./trained_nets/',name,'_',a),'net')
-
-
-
 
 end
 

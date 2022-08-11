@@ -23,7 +23,7 @@ subroutine load_test_data()
   !   write(*,*) 'File not found -> testdata.dat'
   !   stop
   ! end if
-  open(110,file='./input_files/no_samples.in')
+  open(110,file='./input_files/no_samples.txt')
   read(110,*) N_data
   open(111,file='./input_files/testdata.dat')
 
