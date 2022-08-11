@@ -65,7 +65,7 @@ net_name = generate_NN(input4training,outputs,arch_nn,name,max_epochs);
 
 %% Load to fortran input .in files
 % 'test','inplace','store','all'
-write_flag = 'store';
+write_flag = 'inplace';
 load_curr_net = 1;
 
 if(load_curr_net == 0)
