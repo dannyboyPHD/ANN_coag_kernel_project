@@ -62,7 +62,7 @@ outputs = output_scaling(outputs);% log10 scaling the output to [-1,1]
 
 %% gen NN and save net matlab obj
 
-net_name = generate_NN(input4training,outputs,arch_nn,name,max_epochs,show_plots);
+net_name = generate_NN(input4training,outputs,arch_nn,name,max_epochs);
 
 %% Load to fortran input .in files
 % 'test','inplace','store','all'

@@ -1,4 +1,4 @@
-function [new_name] = generate_NN(x,t,arch_nn,name,max_epochs)
+function [new_name] = generate_NN(x,t,arch_nn,name,max_epochs,show_plots)
 
 
 x = x';
@@ -12,7 +12,9 @@ trainFcn = 'trainbr';  % Bayesian Regularization backpropagation.
 
 
 net = fitnet(arch_nn,trainFcn);
-view(net)
+if(show_plots == 1)
+    view(net)
+end
 
 % Choose Input and Output Pre/Post-Processing Functions
 % For a list of all processing functions type: help nnprocess
@@ -34,7 +36,11 @@ net.performFcn = 'mse';  % Mean Squared Error
 % For a list of all plot functions type: help nnplot
 net.plotFcns = {'plotperform','plottrainstate','ploterrhist', ...
     'plotregression', 'plotfit'};
-
+if(show_plots ==1)
+    net.trainParam.showWindow = true;
+else
+    net.trainParam.showWindow = false;
+end
 % Train the Network
 [net,tr] = train(net,x,t);
 
