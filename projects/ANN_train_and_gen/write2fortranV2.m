@@ -31,7 +31,7 @@ function [] = write2fortranV2(in_net,name,flag)
        if(l ==1)
           off_w = size(in_net.IW{1},1)*size(in_net.IW{1},2) - 1;
           % stored column major check reshape docs
-          w_elements(cntr_w:cntr_w+off_w) = reshape(in_net.IW{1}(:,:),[off_w+1,1]);
+          w_elements(cntr_w:cntr_w+off_w) = reshape(in_net.IW{1}(:,:)',[off_w+1,1]);
           cntr_w = cntr_w + off_w +1;
           
           off_b = size(in_net.b{1},1) -1;
@@ -41,7 +41,7 @@ function [] = write2fortranV2(in_net,name,flag)
        end
             off_w = size(in_net.LW{l+1,l},1)*size(in_net.LW{l+1,l},2) -1;
             % col major
-            w_elements(cntr_w:cntr_w+off_w) = reshape(in_net.LW{l+1,l}(:,:),[off_w+1,1]);
+            w_elements(cntr_w:cntr_w+off_w) = reshape(in_net.LW{l+1,l}(:,:)',[off_w+1,1]);
             cntr_w = cntr_w + off_w +1;
             
             off_b = size(in_net.b{l+1},1)-1;

@@ -2,10 +2,10 @@ clear all
 %% ANN parameters
 gen_new_data = 1;
 no_samples = 10000;
-max_epochs = 20;
-arch_nn = [10,10,10];
+max_epochs = 100;
+arch_nn = [20,];
 write2fortran = 1;
-name = 'sarkis_test1';
+name = 'lightweight_test2';
 show_plots = 0;
 
 %% create [0,1] array using Latin Hyper cube sampling
@@ -62,7 +62,7 @@ outputs = output_scaling(outputs);% log10 scaling the output to [-1,1]
 
 %% gen NN and save net matlab obj
 
-net_name = generate_NN(input4training,outputs,arch_nn,name,max_epochs);
+net_name = generate_NN(input4training,outputs,arch_nn,name,max_epochs,show_plots);
 
 %% Load to fortran input .in files
 % 'test','inplace','store','all'
@@ -71,7 +71,7 @@ load_curr_net = 1;
 
 if(load_curr_net == 0)
     %hard code the net you want to write into fortran
-    name = 'best';
+    name = 'coag_net_w_ordering_5:12:10:1';
     net = load(strcat('./trained_nets/',name,'.mat'));
     net = net.net;% fixes annoying object structure when read in
 elseif(load_curr_net == 1)
