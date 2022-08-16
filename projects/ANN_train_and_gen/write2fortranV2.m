@@ -68,15 +68,29 @@ if(strcmp(flag,'test'))
      writematrix(b_elements,strcat(name,'_bias'));
     
     
-elseif(strcmp(flag,'inplace'))
+elseif(strcmp(flag,''))
      path2env = '../speed_test/input_files/';
      disp('writing into test env');
      writematrix(nn_info,strcat(strcat(path2env,name),'_arch'));
      writematrix(w_elements,strcat(strcat(path2env,name),'_weights'));
      writematrix(b_elements,strcat(strcat(path2env,name),'_bias'));
+     
+elseif(strcmp(flag,'inplace'))
+     path2env = '../src_writer/input_files/';
+     disp('writing into src writer env');
+     writematrix(nn_info,strcat(strcat(path2env,name),'_arch'));
+     writematrix(w_elements,strcat(strcat(path2env,name),'_weights'));
+     writematrix(b_elements,strcat(strcat(path2env,name),'_bias'));
+     
+     f = fopen('../src_writer/input_files/net_name.txt','w');
+     fprintf(f,strcat(name,'\n'));
+     fprintf(f,'ann_hc_pure')
+     
+
+   
 elseif(strcmp(flag,'all'))
-     path2env = '../speed_test/input_files/';
-     disp('writing into test and trained_nets env');
+     path2env = '../src_writer/input_files/';
+     disp('writing into src writer and trained_nets env');
      writematrix(nn_info,strcat(strcat(path2env,name),'_arch'));
      writematrix(nn_info,strcat(strcat('./trained_nets/',name),'_arch'));
      

@@ -1,6 +1,4 @@
 
-
-exp()
 pure double precision function ANN_hard_coded_pure(data_in,weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
 double precision, dimension(5), intent(in) :: data_in
 double precision, dimension(5) :: data_inputs

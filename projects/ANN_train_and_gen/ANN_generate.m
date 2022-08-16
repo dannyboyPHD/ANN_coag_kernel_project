@@ -1,16 +1,34 @@
 clear all
 %% ANN parameters
 gen_new_data = 1;
-no_samples = 10000;
-max_epochs = 100;
-arch_nn = [8];
+no_samples = 100000;
+max_epochs = 1500;
+arch_nn = [10];
 write2fortran = 1;
-name = 'lightweight_test2';
-show_plots = 0;
+name = 'lightweight_test';
+show_plots = 1;
+subdomain_sampling =0;
 
 %% create [0,1] array using Latin Hyper cube sampling
 if(gen_new_data ==1)
-    inputs_unscaled = lhsdesign(no_samples,5);
+    if(subdomain_sampling == 1)
+        inputs_unscaled = lhs_subdomains(no_samples,5);
+        
+    elseif(subdomain_sampling ==2)
+        v_min = 10^-29; %m^3
+        v_max = 10^-13; %m^3
+        inputs_unscaled = zeros(no_samples,5);
+        
+        inputs_unscaled(1:no_samples/2,1) = geogrid(v_min,v_max,no_samples/2);
+        inputs_unscaled(1:no_samples/2,2) = geogrid(v_min+0.1*v_min,v_max-0.1*v_max,no_samples/2);
+        inputs_unscaled(no_samples/2+1:no_samples,1) = geogrid(v_min+0.5*v_max,v_max,no_samples/2);
+        inputs_unscaled(no_samples/2+1:no_samples,2) = geogrid(v_min+0.6*v_max,v_max-0.05*v_max,no_samples/2);
+        
+        inputs_unscaled(:,3:5) = lhsdesign(no_samples,3);
+        
+    else
+        inputs_unscaled = lhsdesign(no_samples,5);
+    end
 
     inputs = scaling_simple(inputs_unscaled);%samples form log(v) space, then scales values in physical ranges 
     
@@ -56,7 +74,9 @@ else
 end
 
 %% scaling everything to [-1,1]
-
+hold on
+loglog(inputs(:,1),inputs(:,2),'oc');
+%%
 input4training = scaling4training(inputs_prescaling);
 outputs = output_scaling(outputs);% log10 scaling the output to [-1,1]
 

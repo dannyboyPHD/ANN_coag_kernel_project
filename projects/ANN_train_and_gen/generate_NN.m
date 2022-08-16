@@ -8,7 +8,7 @@ t = t';
 % 'trainlm' is usually fastest.
 % 'trainbr' takes longer but may be better for challenging problems.
 % 'trainscg' uses less memory. Suitable in low memory situations.
-trainFcn = 'trainbr';  % Bayesian Regularization backpropagation.
+trainFcn = 'trainlm';  % Bayesian Regularization backpropagation.
 
 
 net = fitnet(arch_nn,trainFcn);
@@ -20,6 +20,11 @@ end
 % For a list of all processing functions type: help nnprocess
 net.input.processFcns = {'removeconstantrows'};
 net.output.processFcns = {'removeconstantrows'};
+for i = 1:net.numLayers-1
+    net.layers{i}.transferFcn = 'tansig';
+end
+
+
 
 % Setup Division of Data for Training, Validation, Testing
 % For a list of all data division functions type: help nndivision

@@ -14,13 +14,14 @@ double precision, dimension(8,5) :: weight_1
 ! (/-2.963633753009339E+00,-1.917269270652624E+00,6.079122866370408E-01,1.152769298396459E-01,-9.020021291046663E-01,&
 ! 3.408217996306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
 double precision, dimension(8) :: weight_2
-double precision, dimension(2,2) :: weight_3
+double precision, dimension(10) :: weight_3
 double precision, dimension(2) :: weight_4
 !  = (/4.358950562324246E-02,4.198070576006356E-01 /)
 double precision :: b_2
 double precision, dimension(8) :: b_1
-! double precision, dimension(2) :: b_2
-double precision, dimension(2) :: b_3
+! double precision, dimension(10) :: b_2
+! double precision, dimension(2) :: b_3
+double precision :: b_3
 double precision :: b_4
 ! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
 ! double precision :: b_2
