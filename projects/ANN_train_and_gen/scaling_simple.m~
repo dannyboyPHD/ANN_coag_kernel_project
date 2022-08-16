@@ -1,4 +1,4 @@
-function [data] = scaling_simple(inputs)
+function [data] = scaling_simple(inputs,max_min)
 
 %scaling Latin Hypercube sampling to real-life values
 
@@ -6,8 +6,8 @@ function [data] = scaling_simple(inputs)
 v_min = 10^-29; %m^3
 v_max = 10^-13; %m^3
 
-inputs(:,1) = inputs(:,1)*(log10(10^-10v_max) - log10(10^4*v_min)) + log10(10^4*v_min);%v_1
-inputs(:,2) = inputs(:,2)*(log10(v_max) - log10(10^4*v_min)) + log10(10^4*v_min);%v_2
+inputs(:,1) = inputs(:,1)*(log10(v_max) - log10(v_min)) + log10(v_min);%v_1
+inputs(:,2) = inputs(:,2)*(log10(v_max) - log10(v_min)) + log10(v_min);%v_2
 
 inputs(:,1) = 10.^inputs(:,1);
 inputs(:,2) = 10.^inputs(:,2);
@@ -38,7 +38,7 @@ mu_min = 5*10^-6;
 mu_max = 2*10^-4;
 % inputs(:,5) = inputs(:,5)*(mu_max-mu_min) + mu_min;
 %log sampling
-inputs(:,5) = inputs(:,5)*(log10(mu_min) - log10(mu_min)) + log10(mu_min);
+inputs(:,5) = inputs(:,5)*(log10(mu_max) - log10(mu_min)) + log10(mu_min);
 inputs(:,5) = 10.^(inputs(:,5));
 
 
