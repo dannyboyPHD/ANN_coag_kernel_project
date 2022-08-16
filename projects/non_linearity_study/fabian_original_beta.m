@@ -1,4 +1,4 @@
-function [alCoagulationImperial] = untitled9(params, v1, v2)
+function [alCoagulationImperial] = fabian_original_beta(params, v1, v2)
 
 
  pi = 3.1415926535897932384d0;
