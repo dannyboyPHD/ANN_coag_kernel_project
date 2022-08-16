@@ -158,13 +158,3 @@ with open('ann_coag_kernel.f90','w') as f:
     f.write(fcn_name+' = 10**'+fcn_name+'\n')
 
     f.write('end function')
-
-
-
-
-    
-
-   
-
-
-

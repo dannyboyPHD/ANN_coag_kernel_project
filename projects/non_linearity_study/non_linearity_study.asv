@@ -26,6 +26,4 @@ points_on_step = req_v1v2points(v_start,v_end,res)
 
 
 
-
-
 db = b_end - b;
