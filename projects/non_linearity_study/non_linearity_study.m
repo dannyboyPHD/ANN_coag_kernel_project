@@ -1,31 +1,24 @@
 %% study and corden-off areas of suitable non-linearity in beta in simple manner
-
-v_start = [10^-29,10^-29]; % bottom left of beta domain
-% grow in some search direction
-% see what step is required for lnearity measure to drop to ncrease to 1%
-% store, mark on plot
-% create contour plot
-% use this information to create subdomains
-%
-params = [2000,5*10^-7,5*10^-5];
-res = 100
+clear all
 %%
+v_start = [2*10^-17,10^-29]; % bottom left of beta domain
 
-b = fabian_original_beta([1500,5*10^-7,5*10^-5],v_start(1),v_start(2));
+dz  = [0,1]*10^-29;
+domain_limits = [10^-13,10^-14];
+%%
+params = [2000,5*10^-7,5*10^-5];
+nonLin_limit = 0.75; %100%
+% dz_Lims = zeros(100,2);
+n_searches = 1;
+max_n = 3;
+%%
+for i = 1:n_searches
+    v_lims = search_dz(v_start,dz,max_n,nonLin_limit,params,domain_limits);
+    hold on  
+    plot(v_start(1),v_start(2),'k*')
+    plot(v_lims(:,1), v_lims(:,2),'-o')
+    
+    v_start = v_start + 10*[v_start(1),0];
+    
+end
 
-dir = [1,1];  % unit vector in v1 direction
-
-dz = dir*(0.5*10^-28);
-
-b_end = fabian_original_beta([1500,5*10^-7,5*10^-5],v_start(1)+dz(1),v_start(2)+dz(2));
-v_end = v_start +dz;
-
-points_on_step = req_v1v2points(v_start,v_end,res)
-
-
-
-
-
-
-
-db = b_end - b;

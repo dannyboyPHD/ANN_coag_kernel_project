@@ -1,9 +1,9 @@
 clear all
 %% ANN parameters
 gen_new_data = 1;
-no_samples  = 1000;
-max_epochs = 20;
-arch_nn = [10,50,10];
+no_samples  = 500000;
+max_epochs = 2000;
+arch_nn = [8];
 write2fortran = 1;
 name = 'ann_dom';
 show_plots = 1;
@@ -12,10 +12,15 @@ show_plots = 1;
 % v1_min = 1*10^-29;          % m^3, equiv to less than 1 nm in diameter
 % v1_max = 6*10^-13;          % m^3, equiv to roughly 100 micron in diameter
 
-dom = 'all';                   %all, a,b,c,d in strips scheme
+dom = 'c';                   %all, a,b,c,d in strips scheme
 name = strcat(name,'_',dom);
 
 [v1_min,v1_max,v2_min, v2_max] = create_v2_subdomain_STRIPS(dom);
+
+% total_area = 0.5*(6*10^-13 - 10^-29)^2;
+% area = (v2_max - v2_min)*(v1_max - v1_min);
+
+% no_samples = no_samples*(area/total_area);
 
 % v2_min = 1*10^-29;          % m^3
 % v2_max = 6*10^-13;          % m^3
@@ -44,10 +49,11 @@ if(gen_new_data ==1)
     for i = 1:no_samples
         [inputs(i,1),inputs(i,2)] = order_v1v2(inputs(i,1:2));
     end
-%     inputs(:,3) = 2000
+    inputs(:,3) = 2000
 %     inputs(:,4) = 5*10^-7
 %     inputs(:,5) = 5*10^-5
-%     
+    
+  
     dlmwrite('input_kernel_data.txt',inputs,'precision',16);% data for fortran script to gen outputs
     
     if isfile('outputs.txt')&&isfile('no_samples.txt')
@@ -82,7 +88,20 @@ end
 % set(gca, 'YScale', 'log')
 % % set(gca,'Zscale','log')
 %%
+
+%   inputs(:,2) = inputs(:,2)./inputs(:,1);
+%     
+%   in = inputs(:,:);
+%   inputs = zeros(no_samples,4);
+%     
+%   inputs(:,1) = in(:,2);
+%   inputs(:,2:4) = in(:,3:5);
+% 
+
+
+%%
 input4training = scaling4training(inputs_prescaling);
+% input4training = scaling_selfsimilar(inputs_prescaling);
 outputs = output_scaling(outputs);% log10 scaling the output to [-1,1]
 
 %% gen NN and save net matlab obj

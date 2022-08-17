@@ -11,6 +11,7 @@ v2_max = min_max(2,2);
 
 inputs(:,1) = inputs(:,1)*(log10(v1_max) - log10(v1_min)) + log10(v1_min);%v_1
 inputs(:,2) = inputs(:,2)*(log10(v2_max) - log10(v2_min)) + log10(v2_min);%v_2
+% input(:,2) = inputs(:,2).*(log10(v1_max/2) - inputs(:,1)) + inputs(:,1); 
 
 inputs(:,1) = 10.^inputs(:,1);
 inputs(:,2) = 10.^inputs(:,2);

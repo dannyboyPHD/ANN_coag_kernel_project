@@ -8,23 +8,23 @@ if(strcmp(mode,'all'))
     
 elseif(strcmp(mode,'a'))
     v1_min = 1*10^-29;
-    v1_max = 1*10^-28;
+    v1_max = 5.8*10^-27;
  
     v2_min = 1*10^-29; % v min 
-    v2_max = 1*10^-28;
+    v2_max = 3.5*10^-29;
     
 elseif(strcmp(mode,'b'))
-    v1_min = 1*10^-28;
-    v1_max = 1*10^-26;
+    v1_min = 10^-29;
+    v1_max = 1.5*10^-13;
  
     v2_min = 1*10^-29; % v min 
-    v2_max = 1*10^-28;
+    v2_max = 3.5*10^-29;
 elseif(strcmp(mode,'c'))
-    v1_min = 1*10^-26;
-    v1_max = 1*10^-20;
+    v1_min = 6*10^-25;
+    v1_max = 1*10^-13;
  
-    v2_min = 1*10^-29; % v min 
-    v2_max = 1*10^-28;
+    v2_min = 3*10^-29; % v min 
+    v2_max = 1*10^-14;
 elseif(strcmp(mode,'d'))
     v1_min = 5*10^-29;
     v1_max = 6*10^-13;

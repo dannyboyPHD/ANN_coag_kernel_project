@@ -1,2 +1,2 @@
-ann_dom_all_5:10:50:10:1
+ann_dom_c_5:8:1
 ann_hc_pure
