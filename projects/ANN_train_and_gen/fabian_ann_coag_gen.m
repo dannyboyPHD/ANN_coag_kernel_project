@@ -1,9 +1,9 @@
 clear all
 %% ANN parameters
 gen_new_data = 1;
-no_samples  = 100000;
-max_epochs = 2000;
-arch_nn = [10];
+no_samples  = 1000;
+max_epochs = 20;
+arch_nn = [10,50,10];
 write2fortran = 1;
 name = 'ann_dom';
 show_plots = 1;
@@ -12,7 +12,7 @@ show_plots = 1;
 % v1_min = 1*10^-29;          % m^3, equiv to less than 1 nm in diameter
 % v1_max = 6*10^-13;          % m^3, equiv to roughly 100 micron in diameter
 
-dom = 'f';                   %all, a,b,c,d in strips scheme
+dom = 'all';                   %all, a,b,c,d in strips scheme
 name = strcat(name,'_',dom);
 
 [v1_min,v1_max,v2_min, v2_max] = create_v2_subdomain_STRIPS(dom);
@@ -78,8 +78,8 @@ end
 
 %% scaling everything to [-1,1]
 % scatter3(inputs(:,1),inputs(:,2),outputs(:));
-% % set(gca, 'XScale', 'log')
-% % set(gca, 'YScale', 'log')
+% set(gca, 'XScale', 'log')
+% set(gca, 'YScale', 'log')
 % % set(gca,'Zscale','log')
 %%
 input4training = scaling4training(inputs_prescaling);
