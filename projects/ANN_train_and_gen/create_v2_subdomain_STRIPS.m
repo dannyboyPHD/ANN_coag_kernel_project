@@ -1,10 +1,10 @@
 function [v1_min,v1_max,v2_min,v2_max] = create_v2_subdomain_STRIPS(mode)
 if(strcmp(mode,'all'))
     v1_min = 1*10^-29;
-    v1_max = 6*10^-13;
+    v1_max = 6*10^-18;
     
     v2_min = 1*10^-29;
-    v2_max = 6*10^-13;
+    v2_max = 6*10^-18/2;
     
 elseif(strcmp(mode,'a'))
     v1_min = 1*10^-29;

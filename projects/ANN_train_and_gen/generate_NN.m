@@ -8,7 +8,7 @@ t = t';
 % 'trainlm' is usually fastest.
 % 'trainbr' takes longer but may be better for challenging problems.
 % 'trainscg' uses less memory. Suitable in low memory situations.
-trainFcn = 'trainbr';  % Bayesian Regularization backpropagation.
+trainFcn = 'trainlm';  % Bayesian Regularization backpropagation.
 
 
 net = fitnet(arch_nn,trainFcn);

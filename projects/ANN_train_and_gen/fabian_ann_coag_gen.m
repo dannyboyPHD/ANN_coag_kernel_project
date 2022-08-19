@@ -1,18 +1,18 @@
 clear all
 %% ANN parameters
 gen_new_data = 1;
-no_samples  = 500000;
-max_epochs = 2000;
-arch_nn = [8];
+no_samples  = 100000;
+max_epochs = 4000;
+arch_nn = [10,4];
 write2fortran = 1;
-name = 'ann_dom';
+name = 'ann_dom_test';
 show_plots = 1;
 
 %% set domain to be trained
 % v1_min = 1*10^-29;          % m^3, equiv to less than 1 nm in diameter
 % v1_max = 6*10^-13;          % m^3, equiv to roughly 100 micron in diameter
 
-dom = 'c';                   %all, a,b,c,d in strips scheme
+dom = 'all';                   %all, a,b,c,d in strips scheme
 name = strcat(name,'_',dom);
 
 [v1_min,v1_max,v2_min, v2_max] = create_v2_subdomain_STRIPS(dom);
@@ -25,7 +25,7 @@ name = strcat(name,'_',dom);
 % v2_min = 1*10^-29;          % m^3
 % v2_max = 6*10^-13;          % m^3
 
-T_min = 273;               % K
+T_min = 2000;               % K
 T_max = 4000;              % K, it's a hot flame - burning Al2O3 droplet halo 
 mfp_min = 5*10^-8;         % m
 mfp_max = 5*10^-6;         % m
@@ -49,7 +49,7 @@ if(gen_new_data ==1)
     for i = 1:no_samples
         [inputs(i,1),inputs(i,2)] = order_v1v2(inputs(i,1:2));
     end
-    inputs(:,3) = 2000
+%     inputs(:,3) = 2000
 %     inputs(:,4) = 5*10^-7
 %     inputs(:,5) = 5*10^-5
     

@@ -18,7 +18,7 @@ integer :: N_inputs_tot
 ! double precision, dimension(5) :: max_in = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
 ! double precision :: output_max_out = 1.D-13
 ! double precision :: output_min_out = 1.D-17
-double precision :: b1 = 0.523598775598299d0
+! double precision :: b1 = 0.523598775598299d0
 double precision :: pi             !< pi
     parameter (pi = 3.1415926535897932384d0)
 double precision :: boltzmann      !< Boltzmann constant [J/K]
@@ -175,163 +175,140 @@ double precision function alCoagulationImperial(params, v1, v2)
 end function alCoagulationImperial
 !---------------------------------------------------------------------------
 
-!---------------------------------------------------------------------------
-double precision function ANN_hard_coded(data_in)
-! double precision, dimension(5), intent(in) :: data_in
-double precision, dimension(5) :: data_in
-double precision, dimension(2,5) :: weight_1
-! = reshape(&
-! (/-2.963633753009339E+00,-1.917269270652624E+00,6.079122866370408E-01,1.152769298396459E-01,-9.020021291046663E-01,&
-! 3.408217996306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
-double precision, dimension(2) :: weight_2 
-! = (/4.358950562324246E-02,4.198070576006356E-01 /)
-double precision, dimension(2) :: x_hidden_1
-double precision, dimension(2) :: b_1 
-! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
-double precision :: b_2 
-! = -5.347006101653003E-01
-double precision :: beta
-double precision, dimension(5) :: min_in = (/1.0E-29,1.0E-29,2.73E+02,5.0E-08,5.0E-06/)
-double precision, dimension(5) :: max_in = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
-double precision :: output_max_out = 1.D-13
-double precision :: output_min_out = 1.D-17
-double precision, dimension(2) :: x_hidden_2
-
-! hard code values
-weight_1 = 0.75D0
-weight_2 = 1.2D0
-b_1 = 0.5D0
-b_2 = -0.25D0
-! min_in = 1.D0
-! max_out = 10.D0
-! output_max_out = 1.D0
-! output_min_out = -1.D0
-! !input scaling
-data_in(1) = -1.D0 + 2.D0*(log10(data_in(1)) - log10(min_in(1)))/(log10(max_in(1)) - log10(min_in(1)))
-data_in(2) = -1.D0 + 2.D0*(log10(data_in(2)) - log10(min_in(2)))/(log10(max_in(2)) - log10(min_in(2)))
-data_in(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))
-data_in(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))
-data_in(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
-
-! !LAYER 1
-x_hidden_1 = matmul(weight_1, data_in)
-x_hidden_1 = x_hidden_1 + b_1
-x_hidden_1 = dtanh(x_hidden_1)
-! !LAYER OUTPUT
-beta = dot_product(weight_2, x_hidden_1)
-beta = beta + b_2
-
-beta = 0.5d0*(output_max_out-output_min_out) &
-      *(beta+1.d0)+output_min_out
-ANN_hard_coded = beta
-return
-
-end function
-
-
-
-pure double precision function ANN_hard_coded_pure(data_in,weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
-double precision, dimension(5), intent(in) :: data_in
-double precision, dimension(5) :: data_inputs
-double precision, dimension(2,5),intent(in) :: weight_1
-!= reshape(&
-! (/-2.963!6306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
-double precision, dimension(2),intent(in) :: weight_2
-! = (/4.358950562324246E-02,4.198070576006356E-01 /)
-double precision, dimension(2) :: x_hidden_1
-double precision, dimension(2),intent(in) :: b_1
-! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
-double precision,intent(in) :: b_2
-!= -5.347006101653003E-01
+! !---------------------------------------------------------------------------
+! double precision function ANN_hard_coded(data_in)
+! ! double precision, dimension(5), intent(in) :: data_in
+! double precision, dimension(5) :: data_in
+! double precision, dimension(2,5) :: weight_1
+! ! = reshape(&
+! ! (/-2.963633753009339E+00,-1.917269270652624E+00,6.079122866370408E-01,1.152769298396459E-01,-9.020021291046663E-01,&
+! ! 3.408217996306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
+! double precision, dimension(2) :: weight_2 
+! ! = (/4.358950562324246E-02,4.198070576006356E-01 /)
+! double precision, dimension(2) :: x_hidden_1
+! double precision, dimension(2) :: b_1 
+! ! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
+! double precision :: b_2 
+! ! = -5.347006101653003E-01
 ! double precision :: beta
-double precision, dimension(5),intent(in) :: min_in
-! = (/1.0E-29,1.0E-29,2.73E+02,5.0E-08,5.0E-06/)
-double precision, dimension(5),intent(in) :: max_in
-! = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
-double precision,intent(in) :: output_max_out
-! = 1.D-13
-double precision,intent(in) :: output_min_out
-! = 1.D-17
+! double precision, dimension(5) :: min_in = (/1.0E-29,1.0E-29,2.73E+02,5.0E-08,5.0E-06/)
+! double precision, dimension(5) :: max_in = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
+! double precision :: output_max_out = 1.D-13
+! double precision :: output_min_out = 1.D-17
 ! double precision, dimension(2) :: x_hidden_2
 
-! hard code values
+! ! hard code values
 ! weight_1 = 0.75D0
 ! weight_2 = 1.2D0
 ! b_1 = 0.5D0
 ! b_2 = -0.25D0
-! min_in = 1.D0
+! ! min_in = 1.D0
 ! ! max_out = 10.D0
-! output_max_out = 1.D0
-! output_min_out = -1.D0
-! !input scaling
+! ! output_max_out = 1.D0
+! ! output_min_out = -1.D0
+! ! !input scaling
+! data_in(1) = -1.D0 + 2.D0*(log10(data_in(1)) - log10(min_in(1)))/(log10(max_in(1)) - log10(min_in(1)))
+! data_in(2) = -1.D0 + 2.D0*(log10(data_in(2)) - log10(min_in(2)))/(log10(max_in(2)) - log10(min_in(2)))
+! data_in(3) =  -1.D0+ 2.D0*(data_i---------------------------------------------------
+! double precision function ANN_hard_coded(data_in)
+! ! double precision, dimension(5), intent(in) :: data_in
+! double precision, dimension(5) :: data_in
+! double precision, dimension(2,5) :: weight_1
+! ! = reshape(&
+! ! (/-2.963633753009339E+00,-1.917269270652624E+00,6.079122866370408E-01,1.152769298396459E-01,-9.020021291046663E-01,&
+! ! 3.408217996306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
+! double precision, dimension(2) :: weight_2 
+! ! = (/4.358950562324246E-02,4.198070576006356E-01 /)
+! double precision, dimension(2) :: x_hidden_1
+! double precision, dimension(2) :: b_1 
+! ! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
+! double precision :: b_2 
+! ! = -5.347006101653003E-01
+! double precision :: beta
+! double precision, dimension(5) :: min_in = (/1.0E-29,1.0E-29,2.73E+02,5.0E-08,5.0E-06/)
+! double precision, dimension(5) :: max_in = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
+! double precision :: output_max_out = 1.D-13
+! double precision :: output_min_out = 1.D-17
+! double precision, dimension(2) :: x_hidden_2
 
-data_inputs = data_in
-data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
-data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))
-data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))
-data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))
-data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
+! ! hard code values
+! weight_1 = 0.75D0
+! weight_2 = 1.2D0
+! ANN_hard_coded = beta
+! return
 
-! !LAYER 1
-x_hidden_1 = matmul(weight_1, data_in)
-x_hidden_1 = x_hidden_1 + b_1
-x_hidden_1 = dtanh(x_hidden_1)
-! !LAYER OUTPUT
-ANN_hard_coded_pure = dot_product(weight_2, x_hidden_1)
-ANN_hard_coded_pure = ANN_hard_coded_pure + b_2
-
-ANN_hard_coded_pure = 0.5d0*(output_max_out-output_min_out) &
-      *(ANN_hard_coded_pure+1.d0)+output_min_out
-
-return
-
-end function
-pure double precision function ann_hc_pure(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
-double precision, dimension(5), intent(in) :: data_in
-double precision, dimension(5) :: data_inputs
-double precision, dimension(8,5), intent(in) :: weight_1
-double precision, dimension(8), intent(in) :: weight_2
-double precision, dimension(8), intent(in) :: b_1
-double precision, intent(in) :: b_2
-double precision, dimension(5) ,intent(in) :: min_in
-double precision, dimension(5) ,intent(in) :: max_in
-double precision,intent(in) :: output_max_out
-double precision,intent(in) :: output_min_out
-double precision, dimension(8) :: x_hidden_1
+! end function
 
 
-data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
-data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))
-data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))
-data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))
-data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
-!LAYER 1
-x_hidden_1 = matmul(weight_1, data_in)
-x_hidden_1 = x_hidden_1+b_1
-x_hidden_1 = dtanh(x_hidden_1)
 
-
-!OUTPUT LAYER
-ann_hc_pure = dot_product(weight_2, x_hidden_1)
-ann_hc_pure = ann_hc_pure+b_2
-ann_hc_pure = 0.5D0*(ann_hc_pure + 1.D0)*(output_max_out - output_min_out) +output_min_out
-ann_hc_pure = 10**ann_hc_pure
-end function
-
-
-! pure double precision function ann_hc_pure1(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
+! pure double precision function ANN_hard_coded_pure(data_in,weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
 ! double precision, dimension(5), intent(in) :: data_in
 ! double precision, dimension(5) :: data_inputs
-! double precision, dimension(10,5), intent(in) :: weight_1
-! double precision, dimension(10), intent(in) :: weight_2
-! double precision, dimension(10), intent(in) :: b_1
+! double precision, dimension(2,5),intent(in) :: weight_1
+! != reshape(&
+! ! (/-2.963!6306773E+00,8.286377955932387E-01,-5.958908843871094E-01,4.482852536611716E-01,1.051431615441095E-01/), shape(weight_1))
+! double precision, dimension(2),intent(in) :: weight_2
+! ! = (/4.358950562324246E-02,4.198070576006356E-01 /)
+! double precision, dimension(2) :: x_hidden_1
+! double precision, dimension(2),intent(in) :: b_1
+! ! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
+! double precision,intent(in) :: b_2
+! != -5.347006101653003E-01
+! ! double precision :: beta
+! double precision, dimension(5),intent(in) :: min_in
+! ! = (/1.0E-29,1.0E-29,2.73E+02,5.0E-08,5.0E-06/)
+! double precision, dimension(5),intent(in) :: max_in
+! ! = (/1.E-13,1.0E-13,4.0E+03,5.0E-06,2.0E-04 /)
+! double precision,intent(in) :: output_max_out
+! ! = 1.D-13
+! double precision,intent(in) :: output_min_out
+! ! = 1.D-17
+! ! double precision, dimension(2) :: x_hidden_2
+
+! ! hard code values
+! ! weight_1 = 0.75D0
+! ! weight_2 = 1.2D0
+! ! b_1 = 0.5D0
+! ! b_2 = -0.25D0
+! ! min_in = 1.D0
+! ! ! max_out = 10.D0
+! ! output_max_out = 1.D0
+! ! output_min_out = -1.D0
+! ! !input scaling
+
+! data_inputs = data_in
+! data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
+! data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))
+! data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))
+! data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))
+! data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
+
+! ! !LAYER 1
+! x_hidden_1 = matmul(weight_1, data_in)
+! x_hidden_1 = x_hidden_1 + b_1
+! x_hidden_1 = dtanh(x_hidden_1)
+! ! !LAYER OUTPUT
+! ANN_hard_coded_pure = dot_product(weight_2, x_hidden_1)
+! ANN_hard_coded_pure = ANN_hard_coded_pure + b_2
+
+! ANN_hard_coded_pure = 0.5d0*(output_max_out-output_min_out) &
+!       *(ANN_hard_coded_pure+1.d0)+output_min_out
+
+! return
+
+! end function
+! pure double precision function ann_hc_pure(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
+! double precision, dimension(5), intent(in) :: data_in
+! double precision, dimension(5) :: data_inputs
+! double precision, dimension(8,5), intent(in) :: weight_1
+! double precision, dimension(8), intent(in) :: weight_2
+! double precision, dimension(8), intent(in) :: b_1
 ! double precision, intent(in) :: b_2
 ! double precision, dimension(5) ,intent(in) :: min_in
 ! double precision, dimension(5) ,intent(in) :: max_in
 ! double precision,intent(in) :: output_max_out
 ! double precision,intent(in) :: output_min_out
-! double precision, dimension(10) :: x_hidden_1
-! integer(kind=1) :: i,j
+! double precision, dimension(8) :: x_hidden_1
 
 
 ! data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
@@ -341,38 +318,72 @@ end function
 ! data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
 ! !LAYER 1
 ! x_hidden_1 = matmul(weight_1, data_in)
-! ! forall(i = 1:10, j=1:5)
-! !         x_hidden_1(i) = x_hidden_1(i) + weight_1(i,j)*data_inputs(j) 
-! ! !         ! weight_1(i,1:5)*data_inputs(1:5) 
-! ! end forall
-! ! forall( i=1:10)
-! !   x_hidden_1(i) =x_hidden_1(i) + b_1(i)
-! ! end forall
 ! x_hidden_1 = x_hidden_1+b_1
-
-! ! x_hidden_1 = dtanh(x_hidden_1)
-! x_hidden_1 = pow_approx(x_hidden_1)
+! x_hidden_1 = dtanh(x_hidden_1)
 
 
 ! !OUTPUT LAYER
-! forall(i = 1:10)
-! ! ann_hc_pure = dot_product(weight_2, x_hidden_1)
-! ann_hc_pure1 = ann_hc_pure1 + weight_2(i)*x_hidden_1(i) 
-! end forall
-! ann_hc_pure1 = ann_hc_pure1+b_2
-! ann_hc_pure1 = 0.5D0*(ann_hc_pure1 + 1.D0)*(output_max_out - output_min_out) +output_min_out
-! ! ann_hc_pure = 10.D0**ann_hc_pure
-! ann_hc_pure1= pow_approx(ann_hc_pure1)
-! return
+! ann_hc_pure = dot_product(weight_2, x_hidden_1)
+! ann_hc_pure = ann_hc_pure+b_2
+! ann_hc_pure = 0.5D0*(ann_hc_pure + 1.D0)*(output_max_out - output_min_out) +output_min_out
+! ann_hc_pure = 10**ann_hc_pure
 ! end function
 
-! pure elemental double precision function pow_approx(x)
-! double precision, intent(in) :: x
+
+! ! pure double precision function ann_hc_pure1(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
+! ! double precision, dimension(5), intent(in) :: data_in
+! ! double precision, dimension(5) :: data_inputs
+! ! double precision, dimension(10,5), intent(in) :: weight_1
+! ! double precision, dimension(10), intent(in) :: weight_2
+! ! double precision, dimension(10), intent(in) :: b_1
+! ! double precision, intent(in) :: b_2
+! ! double precision, dimension(5) ,intent(in) :: min_in
+! ! double precision, dimension(5) ,intent(in) :: max_in
+! ! double precision,intent(in) :: output_max_out
+! ! double precision,intent(in) :: output_min_out
+! ! double precision, dimension(10) :: x_hidden_1
+! ! integer(kind=1) :: i,j
 
 
-! pow_approx = x - 0.3333*x*x*x + (2.d0/15.D0)*x*x*x*x*x
+! ! data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
+! ! data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))
+! ! data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))
+! ! data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))
+! ! data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))
+! ! !LAYER 1
+! ! x_hidden_1 = matmul(weight_1, data_in)
+! ! ! forall(i = 1:10, j=1:5)
+! ! !         x_hidden_1(i) = x_hidden_1(i) + weight_1(i,j)*data_inputs(j) 
+! ! ! !         ! weight_1(i,1:5)*data_inputs(1:5) 
+! ! ! end forall
+! ! ! forall( i=1:10)
+! ! !   x_hidden_1(i) =x_hidden_1(i) + b_1(i)
+! ! ! end forall
+! ! x_hidden_1 = x_hidden_1+b_1
 
-! return
-! end function
+! ! ! x_hidden_1 = dtanh(x_hidden_1)
+! ! x_hidden_1 = pow_approx(x_hidden_1)
+
+
+! ! !OUTPUT LAYER
+! ! forall(i = 1:10)
+! ! ! ann_hc_pure = dot_product(weight_2, x_hidden_1)
+! ! ann_hc_pure1 = ann_hc_pure1 + weight_2(i)*x_hidden_1(i) 
+! ! end forall
+! ! ann_hc_pure1 = ann_hc_pure1+b_2
+! ! ann_hc_pure1 = 0.5D0*(ann_hc_pure1 + 1.D0)*(output_max_out - output_min_out) +output_min_out
+! ! ! ann_hc_pure = 10.D0**ann_hc_pure
+! ! ann_hc_pure1= pow_approx(ann_hc_pure1)
+! ! return
+! ! end function
+
+! ! pure elemental double precision function pow_approx(x)
+! ! double precision, intent(in) :: x
+
+
+! ! pow_approx = x - 0.3333*x*x*x + (2.d0/15.D0)*x*x*x*x*x
+
+! ! return
+! ! end function
 
 end module

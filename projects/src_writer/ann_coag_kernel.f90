@@ -2,21 +2,21 @@ pure double precision function ann_hc_pure(data_in,min_in,max_in,outpu&
 &t_max_out,output_min_out,weight_1,b_1,weight_2,b_2,weight_3,b_3,weight_4,b_4)
 double precision, dimension(5), intent(in) :: data_in
 double precision, dimension(5) :: data_inputs
-double precision, dimension(10,5), intent(in) :: weight_1
-double precision, dimension(50,10), intent(in) :: weight_2
-double precision, dimension(10,50), intent(in) :: weight_3
-double precision, dimension(10), intent(in) :: weight_4
-double precision, dimension(10), intent(in) :: b_1
-double precision, dimension(50), intent(in) :: b_2
-double precision, dimension(10), intent(in) :: b_3
+double precision, dimension(2,5), intent(in) :: weight_1
+double precision, dimension(2,2), intent(in) :: weight_2
+double precision, dimension(2,2), intent(in) :: weight_3
+double precision, dimension(2), intent(in) :: weight_4
+double precision, dimension(2), intent(in) :: b_1
+double precision, dimension(2), intent(in) :: b_2
+double precision, dimension(2), intent(in) :: b_3
 double precision, intent(in) :: b_4
 double precision, dimension(5) ,intent(in) :: min_in
 double precision, dimension(5) ,intent(in) :: max_in
 double precision,intent(in) :: output_max_out
 double precision,intent(in) :: output_min_out
-double precision, dimension(10) :: x_hidden_1
-double precision, dimension(50) :: x_hidden_2
-double precision, dimension(10) :: x_hidden_3
+double precision, dimension(2) :: x_hidden_1
+double precision, dimension(2) :: x_hidden_2
+double precision, dimension(2) :: x_hidden_3
 
 
 data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))
@@ -43,6 +43,4 @@ ann_hc_pure = dot_product(weight_4, x_hidden_3)
 ann_hc_pure = ann_hc_pure+b_4
 ann_hc_pure = 0.5D0*(ann_hc_pure + 1.D0)*(output_max_out - output_min_out) +output_min_out
 ann_hc_pure = 10**ann_hc_pure
-
-return
 end function
