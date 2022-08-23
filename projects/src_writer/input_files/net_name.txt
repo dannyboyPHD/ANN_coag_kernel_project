@@ -1,2 +1,2 @@
 ann_dom_all_5:6:1
-ann_hc_pure
+beta_1

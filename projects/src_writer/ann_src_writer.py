@@ -29,7 +29,11 @@ def douprec_dim_dummy(dim,name):
         s = 'double precision, dimension('+dim+') :: '+name
     
     return s+'\n'
-
+#============================================================
+#============================================================
+#key variables
+outscaling = 'lin' #log, lin
+inscaling = 'lin' #log lin
 
 
 f = open('./input_files/net_name.txt','r')
@@ -302,7 +306,5 @@ with open('ann_module.f90','w') as f:
 
 
     f.write('end subroutine\n')
-   
-    
 
     f.write('end module')

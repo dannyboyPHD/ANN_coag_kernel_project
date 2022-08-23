@@ -5,7 +5,7 @@ double precision, dimension(6) :: weight_2
 double precision, dimension(6) :: b_1
 double precision :: b_2
 contains 
-pure double precision function ann_hc_pure(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
+pure double precision function beta_1(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
 double precision, dimension(5), intent(in) :: data_in
 double precision, dimension(5) :: data_inputs
 double precision, dimension(6,5), intent(in) :: weight_1
@@ -31,10 +31,10 @@ x_hidden_1 = dtanh(x_hidden_1)
 
 
 !OUTPUT LAYER
-ann_hc_pure = dot_product(weight_2, x_hidden_1)
-ann_hc_pure = ann_hc_pure+b_2
-ann_hc_pure = 0.5D0*(ann_hc_pure + 1.D0)*(output_max_out - output_min_out) +output_min_out
-ann_hc_pure = 10**ann_hc_pure
+beta_1 = dot_product(weight_2, x_hidden_1)
+beta_1 = beta_1+b_2
+beta_1 = 0.5D0*(beta_1 + 1.D0)*(output_max_out - output_min_out) +output_min_out
+beta_1 = 10**beta_1
 end function
 
 !=================================
