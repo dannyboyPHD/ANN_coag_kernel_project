@@ -58,7 +58,7 @@ def read_in_net(net_file):
     for i in range(no_layers):
         weight_label.append('weight_'+fcn_name+'_'+str(i+1))
         bias_label.append('b_'+fcn_name+'_'+str(i+1))
-    return weight_label, weights, bias_label,bias,no_inputs,no_layers
+    return weight_label, weights, bias_label,bias,no_inputs,no_layers,arch
 
 def write_weights_declaration(f,weights, weight_label,no_layers):
     for _ in range(no_layers-1):
@@ -85,7 +85,7 @@ def write_bias_declaration(f,bias,bias_label,no_layers):
         else:
             f.write('double precision, dimension('+str(n_rows)+') :: '+bias_label[_]+'\n')
         
-def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers):
+def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
 
     f.write(first_line(fcn_name,weight_label,bias_label,no_layers))
     # f.write('double precison, dimension('+str(no_inputs)+'), intent(in) :: data_in\n')
@@ -161,6 +161,125 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers):
 
     f.write('end function\n')
 
+def write_combined_net_fcn(f,fcn_name,weight_label1,bias_label1,no_inputs1,no_layers1,arch1,\
+    weight_label2,bias_label2,no_inputs2,no_layers2,arch2):
+
+    f.write(first_line_combined(fcn_name,weight_label1,bias_label1,no_layers1, weight_label2,bias_label2,no_layers2))
+    # f.write('double precison, dimension('+str(no_inputs)+'), intent(in) :: data_in\n')
+    f.write(douprec_dim_in(str(no_inputs2),'data_in'))
+    f.write(douprec_dim_dummy(str(no_inputs2),'data_inputs'))
+
+    #weights
+    for _ in range(no_layers1):
+        if _ ==0:
+            dim = str(arch1[0])+','+str(no_inputs1)
+        elif _ == no_layers1 -1:
+            dim = str(arch1[_ -1])
+        else:
+            dim = str(arch1[_])+','+str(arch1[_ -1])
+       
+        f.write(douprec_dim_in(dim,weight_label1[_]))
+    #bias
+    for _ in range(no_layers1):
+        dim = str(arch1[_])
+        f.write(douprec_dim_in(dim,bias_label1[_]))
+
+    #weights
+    for _ in range(no_layers2):
+        if _ ==0:
+            dim = str(arch2[0])+','+str(no_inputs2)
+        elif _ == no_layers2 -1:
+            dim = str(arch2[_ -1])
+        else:
+            dim = str(arch2[_])+','+str(arch2[_ -1])
+       
+        f.write(douprec_dim_in(dim,weight_label2[_]))
+    #bias
+    for _ in range(no_layers2):
+        dim = str(arch2[_])
+        f.write(douprec_dim_in(dim,bias_label2[_]))
+
+    
+
+    f.write('double precision, dimension('+str(no_inputs2)+') ,intent(in) :: min_in\n')
+    f.write('double precision, dimension('+str(no_inputs2)+') ,intent(in) :: max_in\n')
+    f.write('double precision,intent(in) :: output_max_out\n')
+    f.write('double precision,intent(in) :: output_min_out\n')
+    f.write('double precision :: b1\n')
+    f.write('double precision :: b2\n')
+
+    #hidden layer vectors
+    for _ in range(no_layers1 -1):
+        dim = str(arch1[_])
+        f.write(douprec_dim_dummy(dim,'x_hidden1_'+str(_+1)))
+
+    for _ in range(no_layers2 -1):
+        dim = str(arch2[_])
+        f.write(douprec_dim_dummy(dim,'x_hidden2_'+str(_+1)))
+
+    f.write('\n')
+    f.write('\n')
+
+    #scaling this is hard coded and wont scle with difficult number of inputs - beta1 vs beta2
+    
+    f.write('data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))\n')
+    f.write('data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))\n')
+    f.write('data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))\n')
+    f.write('data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))\n')
+    f.write('data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))\n')
+
+    for _ in range(no_layers1 - 1):
+        if _ == 0:
+            f.write('!LAYER '+str(_+1)+'\n')
+            f.write('x_hidden1_'+str(_+1)+' = matmul('+weight_label1[_]+', data_in(1:3))\n')
+        else:
+            f.write('!LAYER '+str(_+1)+'\n')
+            f.write('x_hidden1_'+str(_+1)+' = matmul('+weight_label1[_]+','+ 'x_hidden1_'+str(_)+')\n')
+        
+        f.write('x_hidden1_'+str(_+1)+' = x_hidden1_'+str(_+1)+'+'+bias_label1[_]+'\n')
+
+        f.write('x_hidden1_'+str(_+1)+' = dtanh(x_hidden1_'+str(_+1)+')\n')
+
+    for _ in range(no_layers2 - 1):
+        if _ == 0:
+            f.write('!LAYER '+str(_+1)+'\n')
+            f.write('x_hidden2_'+str(_+1)+' = matmul('+weight_label2[_]+', data_in)\n')
+        else:
+            f.write('!LAYER '+str(_+1)+'\n')
+            f.write('x_hidden2_'+str(_+1)+' = matmul('+weight_label2[_]+','+ 'x_hidden2_'+str(_)+')\n')
+        
+        f.write('x_hidden2_'+str(_+1)+' = x_hidden2_'+str(_+1)+'+'+bias_label2[_]+'\n')
+
+        f.write('x_hidden2_'+str(_+1)+' = dtanh(x_hidden2_'+str(_+1)+')\n')
+
+
+
+    #output layer hc for 1 output
+    f.write('\n')
+    f.write('\n')
+    f.write('!OUTPUT LAYER\n')
+
+    f.write('b1 = dot_product('+weight_label1[no_layers1-1]+', x_hidden1_'+str(no_layers1-1)+')\n')
+    f.write('b1 = b1+'+bias_label1[no_layers1-1]+'\n')
+
+    #switch to linear out put scaling
+    f.write('b1 = 0.5D0*(b1 + 1.D0)*(output_max_out - output_min_out) +output_min_out\n')
+    f.write('b1 = 10**b1\n')
+
+    f.write('b2 = dot_product('+weight_label2[no_layers2-1]+', x_hidden_'+str(no_layers2-1)+')\n')
+    f.write('b2 = b1+'+bias_label2[no_layers2-1]+'\n')
+    
+
+    #switch to linear out put scaling
+    f.write('b2 = 0.5D0*(b2 + 1.D0)*(output_max_out - output_min_out) +output_min_out\n')
+    f.write('b2 = 10**b2\n')
+    f.write(fcn_name+' = (b1*b2)/(b1+b2)\n')
+    
+    f.write('end function\n')
+
+
+
+
 
 def write_loading_subroutine(f,name,weight_label,bias_label,no_layers):
 
@@ -210,28 +329,26 @@ with open('test.txt','w') as f:
     f.write('module ann_coag\n')
     f.write('implicit none\n')
 
-    w_l,w,b_l,b,no_in,no_lay = read_in_net('net_name')
+    w_l,w,b_l,b,no_in,no_lay,arch = read_in_net('net_name1')
     write_weights_declaration(f,w,w_l,no_lay)
     write_bias_declaration(f,b,b_l,no_lay)
+
+    w2_l,w2,b2_l,b2,no_in2,no_lay2,arch2 = read_in_net('net_name2')
+    write_weights_declaration(f,w2,w2_l,no_lay2)
+    write_bias_declaration(f,b2_l,b2_l,no_lay2)
 
     f.write('contains \n')
     f.write('\n')
 
-    write_pure_fcn(f,'beta_1',w_l,b_l,no_in,no_layers)
+    write_combined_net_fcn(f,'beta',w_l,b_l,no_in,no_lay,arch,\
+    w2_l,b2_l,no_in2,no_lay2,arch2)
 
     f.write('\n')
-    write_loading_subroutine(f,'testnet',w_l,b_l,no_layers)
+    write_loading_subroutine(f,'b1',w_l,b_l,no_lay)
+    write_loading_subroutine(f,'b2',w2_l,b2_l,no_lay2)
    
     f.write('\n')
     f.write('end module')
-
-
-
-
-
-
-
-
 
 
 

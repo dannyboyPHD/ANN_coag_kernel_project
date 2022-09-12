@@ -11,7 +11,10 @@ function a = apply(n,param)
 %           
 %   end
 
-    a = n./(1 - (n.^2)/3 + (2/15)*n.^4);
+    a = exp(n);
+    if(a>2)
+        a = 2
+    end
 
 end
 

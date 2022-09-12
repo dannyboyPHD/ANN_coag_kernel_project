@@ -87,7 +87,7 @@ double precision function alCoagulationImperial(params, v1, v2)
     Kn2 / d2) * d12
 
   ! Harmonic average valid across the entire particle size range
-  alCoagulationImperial = b1 * b2 / (b1 + b2)
+  alCoagulationImperial =  b2
 
   return
 

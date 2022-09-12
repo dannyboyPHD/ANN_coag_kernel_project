@@ -4,7 +4,7 @@ function [data] = scaling4training(inputs)
 
 %particle volume v1 and v2
 v_min = 10^-29; %m^3
-v_max = 10^-13; %m^3
+v_max = 10^-18; %m^3
 % 
 % d_min = ((6.0/pi())*v_min)^(1/3);
 % d_max = ((6.0/pi())*v_max)^(1/3);

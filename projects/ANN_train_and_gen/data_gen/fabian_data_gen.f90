@@ -26,8 +26,8 @@ do i = 1,no_samples
     v1 = input_data(i,1)
     v2 = input_data(i,2)
 
-    ! output(i) = alCoagulationImperial(params, v1, v2)
-    output(i) = beta_1(params, v1, v2)
+    output(i) = alCoagulationImperial(params, v1, v2)
+    ! output(i) = beta_1(params, v1, v2)
 
 end do
 
