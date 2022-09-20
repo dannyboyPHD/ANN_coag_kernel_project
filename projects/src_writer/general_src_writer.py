@@ -85,7 +85,7 @@ def write_bias_declaration(f,bias,bias_label,no_layers):
         else:
             f.write('double precision, dimension('+str(n_rows)+') :: '+bias_label[_]+'\n')
         
-def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
+def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch,scaling,act):
 
     f.write(first_line(fcn_name,weight_label,bias_label,no_layers))
     # f.write('double precison, dimension('+str(no_inputs)+'), intent(in) :: data_in\n')
@@ -97,7 +97,10 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
         if _ ==0:
             dim = str(arch[0])+','+str(no_inputs)
         elif _ == no_layers -1:
-            dim = str(arch[_ -1])
+            if arch[no_layers -1] == 1:
+                dim = str(arch[_ -1])
+            else:
+                dim = str(arch[_])+','+str(arch[_ -1])
         else:
             dim = str(arch[_])+','+str(arch[_ -1])
        
@@ -109,29 +112,36 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
 
     f.write('double precision, dimension('+str(no_inputs)+') ,intent(in) :: min_in\n')
     f.write('double precision, dimension('+str(no_inputs)+') ,intent(in) :: max_in\n')
-    f.write('double precision,intent(in) :: output_max_out\n')
-    f.write('double precision,intent(in) :: output_min_out\n')
+    if arch[-1] == 1:
+        f.write('double precision,intent(in) :: output_max_out\n')
+        f.write('double precision,intent(in) :: output_min_out\n')
+    else:
+        douprec_dim_in(str(arch[-1]),'output_max_out')
+        f.write(douprec_dim_in(dim,'output_max_out'))
+        f.write(douprec_dim_in(dim,'output_min_out'))
+
 
     #hidden layer vectors
     for _ in range(no_layers -1):
         dim = str(arch[_])
         f.write(douprec_dim_dummy(dim,'x_hidden_'+str(_+1)))
 
+    if arch[-1] > 1:
+        f.write(douprec_dim_dummy(str(arch[no_layers -1]),'beta_results'))
+        
+
     f.write('\n')
     f.write('\n')
 
-    #scaling this is hard coded and wont scle with difficult number of inputs - beta1 vs beta2
-    if no_inputs == 3:
-        f.write('data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))\n')
-        f.write('data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))\n')
-        f.write('data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))\n')
-    else:
-        f.write('data_inputs(1) = -1.D0 + 2.D0*(log10(data_in(1)) - min_in(1))/(max_in(1) - min_in(1))\n')
-        f.write('data_inputs(2) = -1.D0 + 2.D0*(log10(data_in(2)) - min_in(2))/(max_in(2) - min_in(2))\n')
-        f.write('data_inputs(3) =  -1.D0+ 2.D0*(data_in(3) - min_in(3))/(max_in(3) - min_in(3))\n')
-        f.write('data_inputs(4) =  -1.D0+ 2.D0*(data_in(4) - min_in(4))/(max_in(4) - min_in(4))\n')
-        f.write('data_inputs(5) =  -1.D0+ 2.D0*(data_in(5) - min_in(5))/(max_in(5) - min_in(5))\n')
+    
+# input scaling def. by scaling list, can be log or linear
+    for _ in range(no_inputs):
+        if scaling[_] == 'lin':
+            f.write('data_inputs('+str(_+1)+') =  -1.D0+ 2.D0*(data_in('+str(_+1)+') - min_in('+str(_+1)+'))/(max_in('+str(_+1)+') - min_in('+str(_+1)+'))\n')
+        elif scaling[_] == 'log':
+             f.write('data_inputs('+str(_+1)+') =  -1.D0+ 2.D0*(log10(data_in('+str(_+1)+')) - min_in('+str(_+1)+'))/(max_in('+str(_+1)+') - min_in('+str(_+1)+'))\n')
 
+# application of layers, act_fcn(wx + b)
     for _ in range(no_layers - 1):
         if _ == 0:
             f.write('!LAYER '+str(_+1)+'\n')
@@ -142,7 +152,12 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
         
         f.write('x_hidden_'+str(_+1)+' = x_hidden_'+str(_+1)+'+'+bias_label[_]+'\n')
 
-        f.write('x_hidden_'+str(_+1)+' = dtanh(x_hidden_'+str(_+1)+')\n')
+        if act == 'tanh':
+            f.write('x_hidden_'+str(_+1)+' = dtanh(x_hidden_'+str(_+1)+')\n')
+        elif act == 'relu':
+            f.write('x_hidden_'+str(_+1)+' = relu(x_hidden_'+str(_+1)+')\n')
+
+
 
 
 
@@ -151,14 +166,31 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch):
     f.write('\n')
     f.write('!OUTPUT LAYER\n')
 
-    f.write(fcn_name+' = dot_product('+weight_label[no_layers-1]+', x_hidden_'+str(no_layers-1)+')\n')
-    f.write(fcn_name+' = '+fcn_name+'+'+bias_label[no_layers-1]+'\n')
 
-    #switch to linear out put scaling
-    f.write(fcn_name+' = 0.5D0*('+fcn_name+' + 1.D0)*(output_max_out - output_min_out) +output_min_out\n')
+    if arch[no_layers-1] == 1:
 
-    # f.write(fcn_name+' = 10**'+fcn_name+'\n')
+        f.write(fcn_name+' = dot_product('+weight_label[no_layers-1]+', x_hidden_'+str(no_layers-1)+')\n')
+        f.write(fcn_name+' = '+fcn_name+'+'+bias_label[no_layers-1]+'\n')
 
+        if scaling[-1] == 'lin':
+            f.write(fcn_name+' = 0.5D0*('+fcn_name+' + 1.D0)*(output_max_out - output_min_out) +output_min_out\n')
+        elif scaling[-1] == 'log':
+            f.write(fcn_name+' = 0.5D0*('+fcn_name+' + 1.D0)*(output_max_out - output_min_out) +output_min_out\n')
+            f.write(fcn_name+' = 10**'+fcn_name+'\n')
+    else:
+
+        f.write('beta_results = matmul('+weight_label[no_layers-1]+', x_hidden_'+str(no_layers-1)+')\n')
+        f.write('beta_results = beta_results +'+bias_label[no_layers-1]+'\n')
+        
+        for _ in range(arch[no_layers-1]):
+            if scaling[no_inputs + _] == 'lin':
+                f.write('beta_results('+str(_+1)+') = 0.5D0*( beta_results('+str(_+1)+')+ 1.D0)*(output_max_out(1) - output_min_out(1)) +output_min_out(1)\n')
+            elif scaling[no_inputs + _] == 'log':
+                f.write('beta_results('+str(_+1)+') = 0.5D0*(beta_results('+str(_+1)+') + 1.D0)*(output_max_out(2) - output_min_out(2)) +output_min_out(2)\n')
+                f.write('beta_results('+str(_+1)+') = 10**beta_results('+str(_+1)+')\n')
+        #output reassembling         
+        f.write(fcn_name+' = beta_results(2)*beta_results(1) + beta_results(1)\n')
+   
     f.write('end function\n')
 
 def write_combined_net_fcn(f,fcn_name,weight_label1,bias_label1,no_inputs1,no_layers1,arch1,\
@@ -281,7 +313,7 @@ def write_combined_net_fcn(f,fcn_name,weight_label1,bias_label1,no_inputs1,no_la
 
 
 
-def write_loading_subroutine(f,name,weight_label,bias_label,no_layers):
+def write_loading_subroutine(f,name,weight_label,bias_label,no_layers,arch):
 
     f.write('subroutine load_weights_bias4'+name+'(file_name)\n')
     f.write('character(len=100) :: file_name,f1,f2,f3\n')
@@ -302,50 +334,92 @@ def write_loading_subroutine(f,name,weight_label,bias_label,no_layers):
         f.write('off = off +1\n')
         f.write('end do\n')
         f.write('end do\n')
+
+
     f.write('! FINAL LAYER\n')
-    f.write('do i = 1,size('+weight_label[no_layers-1]+',1)\n')
-    f.write('read(88,*) '+weight_label[no_layers-1]+'(i)\n')
-    f.write('end do\n')
-    f.write('close(88)\n')
-    f.write('\n')
-    f.write('! biases\n')
-    f.write("f3 = trim(file_name)//'_bias.txt'\n")
-    f.write('open(unit=88,file=f3)\n')
-    for _ in range(no_layers-1):
-        f.write('do i = 1,size('+bias_label[_]+')\n')
-        f.write('read(88,*) '+bias_label[_]+'(i)\n')
+    if arch[-1] >1:
+        _ = no_layers-1
+        f.write('do i = 1,size('+weight_label[_]+',1)\n')
+        f.write('do j = 1,size('+weight_label[_]+',2)\n')
+        f.write('read(88,*) '+weight_label[_]+'(i,j)\n')
+        f.write('off = off +1\n')
+        f.write('end do\n')
         f.write('end do\n')
 
-    f.write('read(88,*) '+bias_label[no_layers-1]+'\n')
+        f.write('close(88)\n')
+        f.write('\n')
+        
+        f.write('! biases\n')
+        f.write("f3 = trim(file_name)//'_bias.txt'\n")
+        f.write('open(unit=88,file=f3)\n')
+        for _ in range(no_layers):
+            f.write('do i = 1,size('+bias_label[_]+')\n')
+            f.write('read(88,*) '+bias_label[_]+'(i)\n')
+            f.write('end do\n')
+        
+    else:
+    
+        
+        f.write('! biases\n')
+        f.write("f3 = trim(file_name)//'_bias.txt'\n")
+        f.write('open(unit=88,file=f3)\n')
+        for _ in range(no_layers-1):
+            f.write('do i = 1,size('+bias_label[_]+')\n')
+            f.write('read(88,*) '+bias_label[_]+'(i)\n')
+            f.write('end do\n')
+
+        f.write('read(88,*) '+bias_label[no_layers-1]+'\n')
+
+        # f.write('read(88,*) '+bias_label[no_layers-1]+'\n')
+
     f.write('close(88)\n')
+
+
     f.write('end subroutine\n')
 
 
 #=================================================================
 #=================================================================
+def write_ReLu(f):
+    f.write('elemental double precision function relu(x)\n')
+    f.write('double precision, intent(in) :: x\n')
+    f.write('if(x.ge.0.D0) then\n')
+    f.write('relu = x\n')
+    f.write('else\n')
+    f.write('relu = 0.D0\n')
+    f.write('end if \n')
+    f.write('return\n')
+    f.write('end function\n')
 
 with open('test.txt','w') as f:
 
     f.write('module ann_coag\n')
     f.write('implicit none\n')
 
-    w_l,w,b_l,b,no_in,no_lay,arch = read_in_net('net_name1')
+    w_l,w,b_l,b,no_in,no_lay,arch = read_in_net('net_name')
     write_weights_declaration(f,w,w_l,no_lay)
     write_bias_declaration(f,b,b_l,no_lay)
 
-    w2_l,w2,b2_l,b2,no_in2,no_lay2,arch2 = read_in_net('net_name2')
-    write_weights_declaration(f,w2,w2_l,no_lay2)
-    write_bias_declaration(f,b2_l,b2_l,no_lay2)
+    # w2_l,w2,b2_l,b2,no_in2,no_lay2,arch2 = read_in_net('net_name2')
+    # write_weights_declaration(f,w2,w2_l,no_lay2)
+    # write_bias_declaration(f,b2_l,b2_l,no_lay2)
 
     f.write('contains \n')
     f.write('\n')
+    write_ReLu(f)
+    f.write('\n')
+    f.write('\n')
 
-    write_combined_net_fcn(f,'beta',w_l,b_l,no_in,no_lay,arch,\
-    w2_l,b2_l,no_in2,no_lay2,arch2)
+    # write_combined_net_fcn(f,'beta',w_l,b_l,no_in,no_lay,arch,\
+    # w2_l,b2_l,no_in2,no_lay2,arch2)
+    #6 inputs, 2 outputs
+    scaling = ['log','log','lin','log','log','lin','log','lin']
+    act = 'tanh'
+    write_pure_fcn(f,'beta_2out',w_l,b_l,no_in,no_lay,arch,scaling,act)
 
     f.write('\n')
-    write_loading_subroutine(f,'b1',w_l,b_l,no_lay)
-    write_loading_subroutine(f,'b2',w2_l,b2_l,no_lay2)
+    write_loading_subroutine(f,'beta_2out',w_l,b_l,no_lay,arch)
+    # write_loading_subroutine(f,'b2',w2_l,b2_l,no_lay2)
    
     f.write('\n')
     f.write('end module')

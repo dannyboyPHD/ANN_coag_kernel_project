@@ -1,2 +1,2 @@
-ball_all_5:8:2
+beta_comb_tanh_all_6:20:2
 ann_hc_pure

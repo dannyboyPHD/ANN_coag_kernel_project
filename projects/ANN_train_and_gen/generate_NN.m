@@ -12,9 +12,7 @@ trainFcn = 'trainbr';  % Bayesian Regularization backpropagation.
 
 
 net = fitnet(arch_nn,trainFcn);
-if(show_plots == 1)
-    view(net)
-end
+
 
 % Choose Input and Output Pre/Post-Processing Functions
 % For a list of all processing functions type: help nnprocess
@@ -23,7 +21,9 @@ net.output.processFcns = {'removeconstantrows'};
 for i = 1:net.numLayers-1
     net.layers{i}.transferFcn = 'tansig';
 end
-
+if(show_plots == 1)
+    view(net)
+end
 
 
 % Setup Division of Data for Training, Validation, Testing

@@ -8,7 +8,7 @@ FC = ifort
 FLAGS = -O3
 
 
-MODANN = test_mod.o ann_module.o
+MODANN = test_mod.o beta_ann.o
 MAIN = speed_test.o
 FILES = load_test.o
 #PSR_pbe.o

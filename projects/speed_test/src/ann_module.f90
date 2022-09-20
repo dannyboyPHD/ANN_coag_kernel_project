@@ -4,6 +4,11 @@ double precision, dimension(6,5) :: weight_1
 double precision, dimension(6) :: weight_2
 double precision, dimension(6) :: b_1
 double precision :: b_2
+
+
+
+
+
 contains 
 pure double precision function ann_hc_pure(data_in,min_in,max_in,output_max_out,output_min_out,weight_1,b_1,weight_2,b_2)
 double precision, dimension(5), intent(in) :: data_in

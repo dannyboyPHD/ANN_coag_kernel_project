@@ -38,18 +38,18 @@ l_min = min_max(4,1);
 l_max = min_max(4,2);
 
 %log scaling
-R_air = 287; %J kg^-1 K^-1
-R_al = 81.5; %J kg^-1 K^-1
+% R_air = 287; %J kg^-1 K^-1
+% R_al = 81.5; %J kg^-1 K^-1
+% 
+% R = rand()*(R_air - R_al) + R_al; 
+% P_atm = 1.01325*10^5; %Pa
 
-R = rand()*(R_air - R_al) + R_al; 
-P_atm = 1.01325*10^5; %Pa
-
-% inputs(:,4) = inputs(:,4)*(log10(l_max) - log10(l_min)) + log10(l_min);
-% inputs(:,4) = 10.^(inputs(:,4));
+inputs(:,4) = inputs(:,4)*(log10(l_max) - log10(l_min)) + log10(l_min);
+inputs(:,4) = 10.^(inputs(:,4));
 
 
 % % consistnet mean free path with vis and T
-inputs(:,4) = sqrt(pi*R/2)*(1/P_atm)*inputs(:,5).*sqrt(inputs(:,3));
+% inputs(:,4) = sqrt(pi*R/2)*(1/P_atm)*inputs(:,5).*sqrt(inputs(:,3));
 
 
 end

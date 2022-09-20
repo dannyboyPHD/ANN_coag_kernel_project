@@ -28,6 +28,7 @@ do i = 1,no_samples
 
     output(i) = alCoagulationImperial(params, v1, v2)
     ! output(i) = beta_1(params, v1, v2)
+    ! output(i) = beta_2(params, v1, v2)
 
 end do
 
