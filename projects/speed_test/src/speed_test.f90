@@ -10,7 +10,7 @@ integer(8) :: clock1            !< End of time measurement
 integer(8) :: clockMax          !< Clock tick granularity
 double precision :: clockRate   !< Number of clock ticks per second
 double precision, allocatable :: data_in(:,:)
-double precision :: s
+double precision :: s,err
 
 
 
@@ -32,11 +32,15 @@ double precision :: s
 ! = (/-7.354971883994940E+00,-8.483405189950064E+00/)
 ! double precision :: b_2
 ! = -5.347006101653003E-01
-double precision, dimension(6) :: min_in= (/log10(1.0E-29),log10(1.0E-29),1.0038E7,log10(3.0732E-24),log10(2.0298E-24),2.0E3/)
-double precision, dimension(6) :: max_in = (/log10(6.E-18),log10(3.0E-18),7.9811E8,log10(1.1515E-10),log10(5.276E-11),4.0E3 /)
-double precision, dimension(2) :: output_max_out= (/ log10(6.851E-9), 1.94950E1/)
-double precision, dimension(2) :: output_min_out= (/log10(1.2902E-15), -9.836E-1 /)
-character(len=100) :: f = 'input_files/beta_comb_relu_all_6:20:20:2'
+! double precision, dimension(6) :: min_in= (/log10(1.0E-29),log10(1.0E-29),1.008666641639102E+07,&
+! &                                           log10(2.965046918551264E-24),log10(2.043573318742417E-24),2.0E3/)
+
+! double precision, dimension(6) :: max_in = (/log10(6.E-18),log10(3.0E-18),7.976974777473704E+08,&
+! &                                           log10(1.149182144837694e-10),log10(4.695329873548609e-11),4.0E3 /)
+
+! double precision, dimension(2) :: output_max_out= (/ log10(6.864598034203446E-09), 1.7681926484592953E1/)
+! double precision, dimension(2) :: output_min_out= (/log10(1.291248315591270E-15), -9.83811724070242E-1 /)
+character(len=100) :: f = 'input_files/beta_comb_relu_all_6:12:2'
 ! weight_1 = 1.D0
 ! weight_2 = 1.D0
 ! weight_3 = 1.D0
@@ -48,6 +52,7 @@ character(len=100) :: f = 'input_files/beta_comb_relu_all_6:20:20:2'
 
 
 call load_weights_bias4beta_2out(f)
+call load_scaling(f)
 
 N_inputs_tot = 5
 call load_test_data
@@ -55,6 +60,7 @@ allocate(res(size(test_out)))
 allocate(data_in(size(test_out),6))
 ! order particle volumes
 data_in(:,1:2) = test_in(:,1:2)
+
 do i = 1,size(test_out)
     if(data_in(i,1).gt.data_in(i,2)) then
 
@@ -66,32 +72,44 @@ do i = 1,size(test_out)
     
     data_in(i,3) = test_in(i,3)/test_in(i,5) ! T/viscosity
 
-    data_in(i,4) = data_in(i,1)/data_in(i,4) ! v/mfp
-    data_in(i,5) = data_in(i,2)/data_in(i,4) ! v2/mfp
+    data_in(i,4) = data_in(i,1)/test_in(i,4) ! v1/mfp
+    data_in(i,5) = data_in(i,2)/test_in(i,4) ! v2/mfp
     data_in(i,6) = test_in(i,3) ! T
 
 end do
 
-
+write(*,*) data_in(1,:)
+read(*,*)
 
 
 
 call system_clock(clock0, clockRate, clockMax)
 do k= 1,100
     do i =1,size(test_out)
-        v1 = test_in(i,1)
-        v2 = test_in(i,2)
-        params(:) = test_in(i,3:5)
-        test_out(i) = alCoagulationImperial(params, v1, v2)
+        ! v1 = test_in(i,1)
+        ! v2 = test_in(i,2)
+        ! params(:) = test_in(i,3:5)
+        ! test_out(i) = alCoagulationImperial(params, v1, v2)
         ! res(i) = alCoagulationImperial_pure(params, v1, v2,pi,boltzmann,coef,b1)
         ! res(i) = ANN_hard_coded(test_in(i,:))
         ! res(i) = ANN_hard_coded_pure(test_in(i,:),weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
         ! res(i) = ann_hc_pure(test_in(i,:),min_in,max_in,output_max_out,output_min_out&
         ! &,weight_1,b_1,weight_2,b_2)
+! 2 LAYER
+!         res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
+! &max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1&
+! &,weight_ann_hc_pure_2,b_ann_hc_pure_2,weight_ann_hc_pure_3,b_ann_hc_pure_3)
 
-        res(i) = beta_2out(data_in,min_in,max_in,output_&
+! 1 LAYER
+            res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
 &max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1,weight_ann_hc_pure_2,b_ann_hc_pure_2)
 
+!         res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
+! &max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1,weight_ann_hc_pure_2,&
+! &b_ann_hc_pure_2,weight_ann_hc_pure_3,b_ann_hc_pure_3,weight_ann_hc_pure_4,b_ann_hc_pure_4,&
+! &weight_ann_hc_pure_5,b_ann_hc_pure_5,weight_ann_hc_pure_6,b_ann_hc_pure_6)
+        ! res(i) = beta_2out(data_in(i,:))
+        ! read(*,*) 
 
 
     end do
@@ -100,17 +118,18 @@ call system_clock(clock1, clockRate, clockMax)
 
 write(*,*) 'time taken: ', dble(clock1 - clock0) / clockRate
 
-
+err = 0.D0
 open(112,file='res.dat')
 do i = 1,size(test_out)
     write(112,*) test_out(i),res(i)
+    err = err + abs(res(i) - test_out(i))/test_out(i)
 end do
 close(112)
 
+err = err/size(test_out)
+write(*,*) 'error is: ',err
 
-
-
-deallocate(test_in,test_out)
+deallocate(test_in,test_out,res)
 
 
 

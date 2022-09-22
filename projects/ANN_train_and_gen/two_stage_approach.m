@@ -1,13 +1,13 @@
 clear all
 %% ANN parameters
 gen_new_data = 1;
-no_samples  = 300000;
+no_samples  = 220000;
 max_epochs = 6000;
-arch_nn = [8];
+arch_nn = [6,2];
 write2fortran = 1;
 name = 'ball';
 show_plots = 1;
-kernel = 1;
+kernel = 3;
 
 %% first stage predicting beta_av
 % v1_min = 1*10^-29;          % m^3, equiv to less than 1 nm in diameter
@@ -188,7 +188,7 @@ for i = 1: sample_size
     elseif kernel == 2 
         beta = b2([T_av,mfp_av,vis_av],inputs_prescaling(i,1),inputs_prescaling(i,2));
         
-    elseif kernel == 12
+    elseif kernel == 3
         beta = fabian_original_beta([T_av,mfp_av,vis_av],inputs_prescaling(i,1),inputs_prescaling(i,2));
 %         beta_check_av = b1([T_av,mfp_av,vis_av],inputs_prescaling(i,1),inputs_prescaling(i,2));
         
@@ -246,8 +246,9 @@ elseif kernel == 2
     
 %     inputs(:,5) = -1+2*(vis(:)-vis_min)/(vis_max - vis_min); % scaled vis
 %     inputs(:,5) = -1+2*(mfp(:) - mfp_min)/(mfp_max - mfp_min);
-elseif kernel == 12
-    inputs = zeros(no_samples,7);
+
+elseif kernel == 3
+    inputs = zeros(no_samples,5);
     inputs(:,1) = outputs4train(:); % beta av scaled
     inputs(:,2) = T(:)./vis(:);
     
@@ -265,16 +266,10 @@ elseif kernel == 12
     inputs(:,4) = inputs_prescaling(:,2)./mfp(:);
     kn2_min = min(inputs(:,4));
     kn2_max = max(inputs(:,4));
-    inputs(:,4) = -1 + 2*(log10(inputs(:,4)) - log10(kn1_min))/(log10(kn1_max) - log10(kn1_min));
-    
-    
-    inputs(:,5) = input4training(:,1);
-    inputs(:,6) = input4training(:,2);
-    inputs(:,7) = T(:);
-    
-    ratio_min = min(inputs(:,7));
-    ratio_max = max(inputs(:,7));
-    inputs(:,7) = -1+2*(inputs(:,7)-ratio_min)/(ratio_max -ratio_min);
+    inputs(:,4) = -1 + 2*(log10(inputs(:,4)) - log10(kn2_min))/(log10(kn2_max) - log10(kn2_min));
+ 
+    inputs(:,5) = T(:);
+    inputs(:,5) = -1+2*(inputs(:,5)-T_min)/(T_max -T_min);
 end
 
 
@@ -287,7 +282,7 @@ outputs = output_scaling_1output(outputs,output_domain);
 
 %%
 name = '2stage';
-arch_nn = [12];
+arch_nn = [10,2];
 net_name = generate_NN(inputs,outputs,arch_nn,name,max_epochs,show_plots);
 %%
 write_flag = 'inplace';% 'test','inplace','store','all'
@@ -330,7 +325,7 @@ for i = 1: sample_size
         beta_check_av = b1([T_av,mfp_av,vis_av],inputs_prescaling(i,1),inputs_prescaling(i,2));
     elseif kernel == 3
         
-        beta = fabian_original_beta(inputs_prescaling(i,3:5),inputs_prescaling(i,1),inputs_prescaling(i,2));
+        beta = fabian_original_beta([T(:),mfp(:),vis(:)],inputs_prescaling(i,1),inputs_prescaling(i,2));
         
         
     end

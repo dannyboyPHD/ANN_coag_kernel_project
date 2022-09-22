@@ -1,2 +1,2 @@
-beta_comb_tanh_all_6:20:2
+beta_comb_relu_all_6:10:2
 ann_hc_pure

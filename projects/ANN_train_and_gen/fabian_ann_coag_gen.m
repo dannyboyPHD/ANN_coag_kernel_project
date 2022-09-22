@@ -1,11 +1,11 @@
 clear all
 %% ANN parameters
 gen_new_data = 1
-no_samples  = 200000;
+no_samples  = 300000;
 max_epochs = 10000;
-arch_nn = [20];
+arch_nn = [10];
 write2fortran = 1;
-name = 'beta_comb_tanh';
+name = 'beta_comb_relu';
 show_plots = 1;
 kernel = 3;
 n_stages = 1;
@@ -212,7 +212,7 @@ elseif kernel ==3
     input4training(:,5) = inputs_prescaling(:,2)./mfp(:);
     kn2_min = min(input4training(:,5));
     kn2_max = max(input4training(:,5));
-    input4training(:,5) = -1 + 2*(log10(input4training(:,5)) - log10(kn1_min))/(log10(kn1_max) - log10(kn1_min));
+    input4training(:,5) = -1 + 2*(log10(input4training(:,5)) - log10(kn2_min))/(log10(kn2_max) - log10(kn2_min));
     
     input4training(:,6) = input(:,3); %T scaled
     
@@ -245,7 +245,7 @@ end
 write2fortranV2(net,name,write_flag);
 %%
 % sample = length(input4training(:,1));
-sample_size = 2000;
+sample_size = 5000;
 
 % out_min = 10^-17;
 % out_max = 5*10^-5;
@@ -296,14 +296,19 @@ err_comp = sum(err)/sample_size;
 plot(beta_true,beta_comp,'o',beta_true,beta_true,'r-');
 
 err_comp
+%% write scaling
+
+scaling_params = zeros(8,2);
+scaling_params(1,:) = [v1_min,v1_max];
+scaling_params(2,:) = [v2_min,v2_max];
+scaling_params(3,:) = [ratio_min,ratio_max];
+scaling_params(4,:) = [kn1_min,kn1_max];
+scaling_params(5,:) = [kn2_min,kn2_max];
+scaling_params(6,:) = [T_min,T_max];
+scaling_params(7:8,:) = output_domain(:,:);
 
 
-
-
-
-
-
-
+writematrix(scaling_params,strcat(name,'_scaling_params'));
 
 
 

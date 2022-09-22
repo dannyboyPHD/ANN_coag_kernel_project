@@ -25,6 +25,7 @@ subroutine load_test_data()
   ! end if
   open(110,file='./input_files/no_samples.txt')
   read(110,*) N_data
+  close(110)
   open(111,file='./input_files/testdata.dat')
 
   write(*,*) 'N_data',N_data
@@ -32,15 +33,22 @@ subroutine load_test_data()
   allocate(test_out(N_data))
 
   do i = 1,N_data !N_data
-    read(111,*) test_in(i,:),test_out(i)
+    read(111,*) test_in(i,:)
   end do
+  close(111)
+
+  open(113,file='./input_files/outputs.txt')
+  do i = 1,N_data !N_data
+    read(113,*) test_out(i)
+  end do
+  close(113)
 
   ! call cpu_time(time1)
   ! do i = 1,N_data
   !   call ann_sim(test_in(1,:),res(1),iflag)
   ! end do
   ! call cpu_time(time2)
-  close(111)
+ 
  
 
   ! deallocate(test_in,test_out,res)

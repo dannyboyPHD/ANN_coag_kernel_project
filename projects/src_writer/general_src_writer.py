@@ -145,7 +145,7 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch,s
     for _ in range(no_layers - 1):
         if _ == 0:
             f.write('!LAYER '+str(_+1)+'\n')
-            f.write('x_hidden_'+str(_+1)+' = matmul('+weight_label[_]+', data_in)\n')
+            f.write('x_hidden_'+str(_+1)+' = matmul('+weight_label[_]+', data_inputs)\n')
         else:
             f.write('!LAYER '+str(_+1)+'\n')
             f.write('x_hidden_'+str(_+1)+' = matmul('+weight_label[_]+','+ 'x_hidden_'+str(_)+')\n')
@@ -184,12 +184,13 @@ def write_pure_fcn(f,fcn_name,weight_label,bias_label,no_inputs,no_layers,arch,s
         
         for _ in range(arch[no_layers-1]):
             if scaling[no_inputs + _] == 'lin':
-                f.write('beta_results('+str(_+1)+') = 0.5D0*( beta_results('+str(_+1)+')+ 1.D0)*(output_max_out(1) - output_min_out(1)) +output_min_out(1)\n')
+                f.write('beta_results('+str(_+1)+') = 0.5D0*( beta_results('+str(_+1)+')+ 1.D0)*(output_max_out('+str(_+1)+') - output_min_out('+str(_+1)+')) +output_min_out('+str(_+1)+')\n')
             elif scaling[no_inputs + _] == 'log':
-                f.write('beta_results('+str(_+1)+') = 0.5D0*(beta_results('+str(_+1)+') + 1.D0)*(output_max_out(2) - output_min_out(2)) +output_min_out(2)\n')
+                f.write('beta_results('+str(_+1)+') = 0.5D0*(beta_results('+str(_+1)+') + 1.D0)*(output_max_out('+str(_+1)+') - output_min_out('+str(_+1)+')) +output_min_out('+str(_+1)+')\n')
                 f.write('beta_results('+str(_+1)+') = 10**beta_results('+str(_+1)+')\n')
         #output reassembling         
         f.write(fcn_name+' = beta_results(2)*beta_results(1) + beta_results(1)\n')
+        f.write('return\n')
    
     f.write('end function\n')
 
@@ -391,6 +392,36 @@ def write_ReLu(f):
     f.write('return\n')
     f.write('end function\n')
 
+def load_scaling_params(f,arch,no_in,scaling):
+    f.write('subroutine load_scaling(file_name)\n')
+    f.write('character(len=100) :: file_name,f1,f2,f3\n')
+    f.write('integer :: i,j\n')
+    f.write('\n')
+    f.write("f1 = trim(file_name)//'_scaling_params.txt'\n")
+
+    f.write('open(unit=88,file=f1)\n')
+    for _ in range(no_in):
+        if scaling[_] == 'lin':
+            f.write('read(88,*) min_in('+str(_+1)+'),max_in('+str(_+1)+')\n')
+        elif scaling[_] == 'log':
+            f.write('read(88,*) min_in('+str(_+1)+'),max_in('+str(_+1)+')\n')
+            f.write('min_in('+str(_+1)+') = log10(min_in('+str(_+1)+'))\n')
+            f.write('max_in('+str(_+1)+') = log10(max_in('+str(_+1)+'))\n')
+  
+
+    
+    for _ in range(arch[-1]):
+        if scaling[no_in+_] == 'lin':
+            f.write('read(88,*) output_min_out('+str(_+1)+'),output_max_out('+str(_+1)+')\n')
+        elif scaling[no_in+_] == 'log':
+            f.write('read(88,*) output_min_out('+str(_+1)+'),output_max_out('+str(_+1)+')\n')
+            f.write('output_min_out('+str(_+1)+') = log10(output_min_out('+str(_+1)+'))\n')
+            f.write('output_max_out('+str(_+1)+') = log10(output_max_out('+str(_+1)+'))\n')
+     
+    f.write('close(88)\n')
+    f.write('end subroutine\n')
+
+
 with open('test.txt','w') as f:
 
     f.write('module ann_coag\n')
@@ -399,6 +430,11 @@ with open('test.txt','w') as f:
     w_l,w,b_l,b,no_in,no_lay,arch = read_in_net('net_name')
     write_weights_declaration(f,w,w_l,no_lay)
     write_bias_declaration(f,b,b_l,no_lay)
+
+    f.write('double precision, dimension('+str(no_in)+') :: min_in\n')
+    f.write('double precision, dimension('+str(no_in)+') :: max_in\n')
+    f.write('double precision, dimension('+str(arch[-1])+') :: output_max_out\n')
+    f.write('double precision, dimension('+str(arch[-1])+') :: output_min_out\n')
 
     # w2_l,w2,b2_l,b2,no_in2,no_lay2,arch2 = read_in_net('net_name2')
     # write_weights_declaration(f,w2,w2_l,no_lay2)
@@ -414,12 +450,13 @@ with open('test.txt','w') as f:
     # w2_l,b2_l,no_in2,no_lay2,arch2)
     #6 inputs, 2 outputs
     scaling = ['log','log','lin','log','log','lin','log','lin']
-    act = 'tanh'
+    act = 'relu'
     write_pure_fcn(f,'beta_2out',w_l,b_l,no_in,no_lay,arch,scaling,act)
 
     f.write('\n')
     write_loading_subroutine(f,'beta_2out',w_l,b_l,no_lay,arch)
     # write_loading_subroutine(f,'b2',w2_l,b2_l,no_lay2)
+    load_scaling_params(f,arch,no_in,scaling)
    
     f.write('\n')
     f.write('end module')
