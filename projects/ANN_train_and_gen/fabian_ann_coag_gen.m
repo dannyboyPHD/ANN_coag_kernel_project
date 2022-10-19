@@ -229,11 +229,11 @@ net_name = generate_NN(input4training,outputs4train,arch_nn,name,max_epochs,show
 
 %% Load to fortran input .in files
 write_flag = 'test';% 'test','inplace','store','all'
-load_curr_net = 1;
+load_curr_net = 0;
 
 if(load_curr_net == 0)
     %hard code the net you want to write into fortran
-    name = 'b1_6tanh_3mill_samples_3:6:1';
+    name = 'beta_comb_relu_all_6:12:2';
     net = load(strcat('./trained_nets/',name,'.mat'));
     net = net.net;% fixes annoying object structure when read in
 elseif(load_curr_net == 1)
@@ -241,8 +241,12 @@ elseif(load_curr_net == 1)
     net = load(strcat('./trained_nets/',name));
     net = net.net;% fixes annoying object structure when read in
 end
-
+%%
 write2fortranV2(net,name,write_flag);
+%%
+write2fortranV2_col_maj(net,strcat(name,'ColMaj'),write_flag);
+
+
 %%
 % sample = length(input4training(:,1));
 sample_size = 5000;
@@ -309,6 +313,11 @@ scaling_params(7:8,:) = output_domain(:,:);
 
 
 writematrix(scaling_params,strcat(name,'_scaling_params'));
+%%
+
+scaling_params = readmatrix(strcat(name,'_scaling_params'));
+
+writematrix(reshape(scaling_params,[length(scaling_params(:,1))*length(scaling_params(1,:)),1]),strcat(name,'_scaling_paramsColMaj'));
 
 
 

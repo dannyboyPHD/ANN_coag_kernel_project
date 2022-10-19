@@ -47,6 +47,14 @@ def douprec_dim_in(dim,name):
         s = 'double precision, dimension('+dim+'), intent(in) :: '+name
     
     return s+'\n'
+def douprec_dim_in_hc(dim,name):
+    if dim ==str(1):
+        #scalar
+        s = 'double precision, intent(in) :: '+name
+    else:
+        s = 'double precision, dimension('+dim+'), intent(in) :: '+name
+    
+    return s
 
 def douprec_dim_dummy(dim,name):
     if dim ==1:

@@ -81,15 +81,15 @@ end do
 write(*,*) data_in(1,:)
 read(*,*)
 
-
+! v1 = test_in(i,1)
+!         v2 = test_in(i,2)
+!         params(:) = test_in(i,3:5)
 
 call system_clock(clock0, clockRate, clockMax)
 do k= 1,100
     do i =1,size(test_out)
-        ! v1 = test_in(i,1)
-        ! v2 = test_in(i,2)
-        ! params(:) = test_in(i,3:5)
-        ! test_out(i) = alCoagulationImperial(params, v1, v2)
+        
+        ! res(i) = alCoagulationImperial(test_in(i,3:5), test_in(i,1), test_in(i,2))
         ! res(i) = alCoagulationImperial_pure(params, v1, v2,pi,boltzmann,coef,b1)
         ! res(i) = ANN_hard_coded(test_in(i,:))
         ! res(i) = ANN_hard_coded_pure(test_in(i,:),weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
