@@ -205,11 +205,7 @@ def write_hc_fcn(f,fcn_name,weight_label,w,bias_label,b,no_inputs,no_layers,arch
     f.write(douprec_dim_in(str(no_inputs),'data_in'))
     f.write(douprec_dim_dummy(str(no_inputs),'data_inputs'))
 
-    # w = [[ float(f.readline()) for _ in range(n_cols)] for z in range(n_rows)]
-
-    
-
-    #weights
+    off = 0
     for _ in range(no_layers):
         if _ ==0:
             dim = str(arch[0])+','+str(no_inputs)
@@ -222,17 +218,31 @@ def write_hc_fcn(f,fcn_name,weight_label,w,bias_label,b,no_inputs,no_layers,arch
             dim = str(arch[_])+','+str(arch[_ -1])
        
         f.write(douprec_dim_in_hc(dim,weight_label[_]))
-        f.write('=(/ &\n')
+        f.write('=reshape((/ &\n')
+        
+        if _ < no_layers-1:
+            for i in range(off,off+arch[_]*arch[_+1]):
+                f.write(str(w[i])+',&\n')
 
-        for i in range(arch[i]*arch[i+1]):
-            w[i]
+                if _ == 0:
+                    off = arch[_]*no_in
+                else:
+                    off = arch[_]*arch[_+1]
+                # print('off1',off)
+        else:
+            for i in range(off , off + arch[-2]*arch[-1]):
+                # print(arch[_-1])
+                # print('i',i)
+                f.write(str(w[i])+',&\n')
+        f.write('/),shape('+weight_label[_]+'))\n')
+
     #bias
     for _ in range(no_layers):
         dim = str(arch[_])
         f.write(douprec_dim_in(dim,bias_label[_]))
 
     #load scaling params
-    g = open('input_files/'+net_name+'_scaling_paramsColMaj.txt')
+    g = open('input_files/'+net_name+'_scaling_params.txt')
     
 
     scaling_mins = [ float(g.readline()) for _ in range(no_in)] 
@@ -618,9 +628,16 @@ with open('test.txt','w') as f:
         f.write('contains \n')
         f.write('\n')
     elif code_structure == 'hc':
-        with open('/input_files/'+net_name+'_scaling_paramsColMaj.txt') as k:
-            w = [ float(k.readline()) for _ in range(no_in)] 
-
+        with open('./input_files/'+net_name+'_weights.txt') as k:
+            no_w = 0
+            for l in range(no_lay-1):
+                no_w = arch[l]*arch[l+1] + no_w
+            no_w = no_w + no_in*arch[0]
+            
+            w = [float(k.readline()) for _ in range(no_w)]
+          
+            # print(len(w))
+            k.close()
       
     # w2_l,w2,b2_l,b2,no_in2,no_lay2,arch2 = read_in_net('net_name2')
     # write_weights_declaration(f,w2,w2_l,no_lay2)
