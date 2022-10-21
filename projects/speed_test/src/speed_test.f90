@@ -55,40 +55,46 @@ do i = 1,size(test_out)
     data_in(i,6) = test_in(i,3) ! T
 
 end do
+test_in(:,1:2) = data_in(:,1:2)
 
 write(*,*) data_in(1,:)
 read(*,*)
 
-
+! v1 = test_in(i,1)
+!         v2 = test_in(i,2)
+!         params(:) = test_in(i,3:5)
 
 call system_clock(clock0, clockRate, clockMax)
 do k= 1,100
     do i =1,size(test_out)
 
-! v1 = test_in(i,1)
-! v2 = test_in(i,2)
-! params(:) = test_in(i,3:5)
-!------ UNCOMMENT FOR EXACT TIMING COMPARISON ---------    
-        
-        ! res(i) = alCoagulationImperial(test_in(i,3:5),test_in(i,1), test_in(i,2))
-       
-!--------------------------------------------------------
-        ! res(i) = alCoagulationImperial_pure(params, v1, v2,pi,boltzmann,coef,b1)
+        ! res(i) = alCoagulationImperial(test_in(i,3:5), test_in(i,1), test_in(i,2))
         ! res(i) = alCoagulationImperial_pure(params, v1, v2,pi,boltzmann,coef,b1)
         ! res(i) = ANN_hard_coded(test_in(i,:))
         ! res(i) = ANN_hard_coded_pure(test_in(i,:),weight_1,weight_2,b_1,b_2,min_in,max_in,output_max_out,output_min_out)
         ! res(i) = ann_hc_pure(test_in(i,:),min_in,max_in,output_max_out,output_min_out&
         ! &,weight_1,b_1,weight_2,b_2)
 
-
-! 2 LAYER
+!--------- 2 LAYER ---------
 !         res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
 ! &max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1&
 ! &,weight_ann_hc_pure_2,b_ann_hc_pure_2,weight_ann_hc_pure_3,b_ann_hc_pure_3)
-
+!-------- 1 LAYER ----------
 ! 1 LAYER
-            res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
-&max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1,weight_ann_hc_pure_2,b_ann_hc_pure_2)
+!             res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&
+! &max_out,output_min_out,weight_ann_hc_pure_1,b_ann_hc_pure_1,weight_ann_hc_pure_2,b_ann_hc_pure_2)
+
+
+! PLEASE READ FABIAN:
+            ! data_in = [v1,v2 T/vis,v1/mfp,v2/mfp,T]
+            ! test_in = [v1,v2,T,mfp,vis] or [v1,v2,params] from Fabian's orginal code 
+            res(i) = beta_ann(data_in(i,:))
+            ! equivalent
+        ! res(i) = beta_ann((/test_in(i,1), test_in(i,2), test_in(i,3)/test_in(i,5),test_in(i,1)/test_in(i,4),&
+        ! test_in(i,2)/test_in(i,4),test_in(i,3)/))
+        ! with you notation likely looks like this
+        !res(i) = beta_ann((/v1, v2, params(1)/params(3), v1/params(2), v2/params(2), params(1) /)) !<-------------------- 
+
 
 ! 3 LAYER
 !         res(i) = beta_2out(data_in(i,:),min_in,max_in,output_&

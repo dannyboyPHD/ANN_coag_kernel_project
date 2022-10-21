@@ -4,7 +4,7 @@ DIR=..
 
 EXE = speed_test
 
-FC = ifort
+FC = gfortran
 FLAGS = -O3
 
 

@@ -1,2 +1,2 @@
-beta_comb_relu_all_6:10:2
+beta_comb_relu_all_6:15:2ColMaj
 ann_hc_pure
