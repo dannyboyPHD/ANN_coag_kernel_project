@@ -9,6 +9,7 @@ function [alCoagulationImperial] = fabian_original_beta(params, v1, v2)
                                  4.84190814920071d+05,  3.54139071251940d+06,  ...
                                  0.50000000000000d+00,  7.81269706389624d-02],...
                                  [2, 5]);
+                             
   b1 = 0.523598775598299d0 ;
   d1 = exp(log(v1 / b1) / 3.0);
   d2 = exp(log(v2 / b1) / 3.0);

@@ -43,7 +43,7 @@ if(gen_new_data ==1)
     
     inputs_unscaled = lhsdesign(no_samples,5);
     
-    inputs = scaling_simple(inputs_unscaled,domain);%samples form log(domain) space, then scales values in physical ranges 
+    inputs = scaling_simple(inputs_unscaled,domain);%samples fROm log(domain) space, then scales values in physical ranges 
 
     % order v1
     for i = 1:no_samples
@@ -93,7 +93,6 @@ output4train = zeros(length(outputs),2);
 beta_av = zeros(length(outputs),1);
 
 % kernel = 1;
-
 if kernel ==1 
     for i = 1:length(outputs)    
         beta_av(i) = b1([T_av,mfp_av,vis_av],inputs_prescaling(i,1),inputs_prescaling(i,2));
@@ -311,12 +310,10 @@ scaling_params(5,:) = [kn2_min,kn2_max];
 scaling_params(6,:) = [T_min,T_max];
 scaling_params(7:8,:) = output_domain(:,:);
 
-
 writematrix(scaling_params,strcat(name,'_scaling_params'));
+
 %%
-
 scaling_params = readmatrix(strcat(name,'_scaling_params'));
-
 writematrix(reshape(scaling_params,[length(scaling_params(:,1))*length(scaling_params(1,:)),1]),strcat(name,'ColMaj_scaling_params'));
 
 

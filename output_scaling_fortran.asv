@@ -1,0 +1,47 @@
+function [f] = output_scaling_fortran(f,start,fcn_name,x,mm_name,min_max,scaling_type)
+i = find(strcmp([f{:}],start_point));
+n_inputs = size(min_max,1);
+
+f = {f{1:i},"! output scaling - start",f{i+1:end}};
+i = i+1;
+
+for j=1:n_inputs
+    if strcmp(scaling_type{j},'linear')
+        a = "";
+        b = "";
+    elseif strcmp(scaling_type{j},'log')
+        a = "10**(";
+        b = ")";
+    elseif strcmp(scaling_type{j},'ln')
+        a = "exp(";
+        b = ")";
+    if n_inputs ==1
+        out_max = mm_name+"(2)";
+        out_min = mm_name+"(1)";
+    else
+        out_max = mm_name+"("+num2str(j)+",2)";
+        out_min = mm_name+"("+num2str(j)+",1)";
+    end
+    
+   
+   line = x+"= 0.5D0*("+x+"+1.D0)*("+out_max+"-"+out_min+") + "+out_min;
+   
+   f = {f{1:i},line,f{i+1:end}};
+   i=i+1;
+   
+   % for single output case 
+   % to do mulitple outputs
+   line = fcn_name+" = "+a+x+b;
+   f = {f{1:i},line,f{i+1:end}};
+   i=i+1;
+   
+end
+
+f = {f{1:i},"! output scaling - end",f{i+1:end}};
+
+
+
+
+
+end
+

@@ -1,0 +1,188 @@
+clear all
+%% load other functions
+addpath '/Users/danielosullivan/Desktop/ANN_coag_kernel/projects/ANN_train_and_gen/'
+addpath '/Users/danielosullivan/Desktop/ANN_coag_kernel/osf.m'
+
+%% ANN parameters
+gen_new_data = 1;
+
+no_samples  = 150000;
+max_epochs = 250;
+
+arch_nn = [4];
+
+name = 'test2';
+%%  Aggregation Kernal Set Up
+V_or_D = 'volume';
+
+no_params = 1;
+min_max = zeros(2+no_params,2); % [min,max] indexed = (v1,v2,param1,...param_M)
+scaling_type = {}; % also affects the sampling behaviour either logspace or linear space
+param_names = {};
+
+load_existing_agg_kernel = true;
+
+if ~load_existing_agg_kernel
+    inputs_setup;
+     if not(isfolder(strcat('./',name,'_project')))
+        mkdir(strcat('./',name,'_project'));
+     end
+    save(strcat(strcat('./',name,'_project'),'/','min_max.mat'),'min_max');
+    save(strcat(strcat('./',name,'_project'),'/','no_params.mat'),'no_params');
+    save(strcat(strcat('./',name,'_project'),'/','param_names.mat'),'param_names');
+    save(strcat(strcat('./',name,'_project'),'/','scaling_type.mat'),'scaling_type');
+else
+    load(strcat(strcat('./',name,'_project'),'/','min_max.mat'),'min_max');
+    load(strcat(strcat('./',name,'_project'),'/','no_params.mat'),'no_params');
+    load(strcat(strcat('./',name,'_project'),'/','param_names.mat'),'param_names');
+    load(strcat(strcat('./',name,'_project'),'/','scaling_type.mat'),'scaling_type');
+    disp(strcat('loaded existing kernel: ',name)); 
+end
+
+%% Sampling - data generation
+
+% quasi-random sampling
+rng default;
+quasi_random_technique = 3;
+
+if quasi_random_technique ==1
+    samples = lhsdesign(no_samples,2 + no_params);
+elseif quasi_random_technique ==2
+    p = haltonset(2+no_params,'leap',10,'skip',5000);
+%     p = scramble(p,'RR2');
+    samples = net(p,no_samples);
+elseif quasi_random_technique == 3
+    p = sobolset(2+no_params);
+    p = scramble(p,'MatousekAffineOwen');
+    samples = net(p,no_samples);
+end
+
+samples = sampling_simple(samples,min_max,scaling_type);
+
+%----------------------------
+% Apply physical constraints
+%----------------------------
+[mfp,mu] = ideal_gas_constraints(samples(:,3));
+
+samples(:,4) = mfp;
+samples(:,5) = mu;
+
+% order biggest size first - collision symmetry
+[samples(:,1),samples(:,2)] = order_v1v2(samples(:,1:2));
+
+%%
+
+% star_discrepancy(samples(:,1:3))
+
+%%
+target = zeros(no_samples,1);
+
+for i = [1:no_samples]
+  target(i) = fabian_original_beta([samples(i,3),samples(i,4),samples(i,5)]...
+                                  , samples(i,1), samples(i,2));
+end
+
+%% rescaling for training
+
+training_data  = scaling_simple(samples,min_max,scaling_type);
+
+output_min_max = [min(target),max(target)];
+
+target         = scaling_simple(target(:),output_min_max,[{'log'}]);
+
+%% training
+show_plots = 1;
+activation_fun = 'tribas';
+
+[network,net_name] = create_nn(training_data(:,:),target,...
+                            arch_nn,name,max_epochs,show_plots...
+                            ,activation_fun);
+network.name = net_name;
+
+%% 
+plotregression(target,network(training_data(:,:)'))
+
+%% Write out to .f90 or .c src file
+
+src_writing_inputs;
+%%
+
+if strcmp(Language,'fortran')
+    % single input vector implementation
+    f = create_fortran_function(network.name,{'x'},[2+no_params,1]); 
+    
+    %scaled inputs
+    f = declare_local_fortran(f,'x_scaled',[2+no_params,1]);
+    
+    
+    mm = scale_minmax(min_max,scaling_type);
+    %min max for scaling - apply scaling
+    f = declare_local_array_fortran(f,'min_max',size(min_max),...
+                            reshape(mm,[size(min_max,1)*size(min_max,2),1]),'%.8e');
+    
+    % write out weights
+    %input Layer
+    [w_in,b_in] = get_weights_biases_colmaj(network,1);
+    s = network.IW;
+    f = declare_local_array_fortran(f,'w1',size(network.IW{1}),w_in,'%.16f');
+    f = declare_local_array_fortran(f,'b1',size(b_in),b_in,'%.16f');
+    
+    f = declare_local_fortran(f,'x_hid_1',[size(network.IW{1},1),1]);
+    
+    % hidden and output layers
+    for k = 2:network.numLayers
+        [w_in,b_in] = get_weights_biases_colmaj(network,k);
+        f = declare_local_array_fortran(f,"w"+num2str(k),size(network.LW{k}),w_in,'%.16f');
+        f = declare_local_array_fortran(f,"b"+num2str(k),size(b_in),b_in,'%.16f');
+    end
+    
+    % scaling 
+    f = input_scaling_fortran(f,"! main body","x","x_scaled",min_max,scaling_type,scaling_implement);
+    
+    % Layers
+      f = Layer_fortran(f,"! input scaling - end","x_hid_1","w1","x_scaled","b1",1,activation_fun);
+    
+    for k = 2:network.numLayers
+        if k == network.numLayers
+            x_out = network.name;
+        else
+            x_out = "x_hid_"+num2str(k);
+        end
+        w = "w"+num2str(k);
+        b = "b"+num2str(k);
+        x = "x_hid_1"+num2str(k-1);
+        
+        f = Layer_fortran(f,"! Layer "+num2str(k-1)+" - end",x_out,
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

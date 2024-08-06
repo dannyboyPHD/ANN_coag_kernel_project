@@ -1,0 +1,10 @@
+! Artificial Neural Networks
+
+5		! Number of inputs
+
+! Network shape
+3				! Layers
+5	2	1		! Neurons per layer
+-1				! Which inputs (-1 for all)
+1.D-13				! Max out
+1.D-17				! Min out

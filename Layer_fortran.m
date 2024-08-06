@@ -1,0 +1,43 @@
+function [f] = Layer_fortran(f,start_point,x_hid,w,x,b,L_no,Last,actfcn)
+i = find(strcmp([f{:}],start_point));
+
+f = {f{1:i},"! Layer "+num2str(L_no)+" - start",f{i+1:end}};
+i = i+1;
+
+%matmul 
+line = x_hid+"= matmul("+w+","+x+")";
+   
+f = {f{1:i},line,f{i+1:end}};
+i=i+1;
+
+% biases
+line = x_hid+"= "+x_hid+"+"+b;
+   
+f = {f{1:i},line,f{i+1:end}};
+i=i+1;
+if Last == false
+    %act fcn
+    if strcmp(actfcn,'poslin')
+        a = "relu(";
+        b=")";
+    elseif strcmp(actfcn,'tribas')
+        a = "tribas(";
+        b=")";
+
+    end
+
+    line = x_hid+"= "+a+x_hid+b;
+    f = {f{1:i},line,f{i+1:end}};
+    i=i+1;
+end
+
+
+
+
+f = {f{1:i},"! Layer "+num2str(L_no)+" - end",f{i+1:end}};
+
+
+
+
+end
+

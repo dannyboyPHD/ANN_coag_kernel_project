@@ -19,8 +19,10 @@ net = fitnet(arch_nn,trainFcn);
 net.input.processFcns = {'removeconstantrows'};
 net.output.processFcns = {'removeconstantrows'};
 for i = 1:net.numLayers-1
-    net.layers{i}.transferFcn = 'poslin';
+    net.layers{i}.transferFcn = 'tribas';
 end
+
+
 if(show_plots == 1)
     view(net)
 end

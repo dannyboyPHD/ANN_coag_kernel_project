@@ -1,0 +1,35 @@
+function [f] = input_scaling_fortran(f,start_point,var_in,var_scale,min_max,scaling_type,scaling_implement)
+i = find(strcmp([f{:}],start_point));
+n_inputs = size(min_max,1);
+
+f = {f{1:i},"! input scaling - start",f{i+1:end}};
+i = i+1;
+
+
+
+
+
+for j=1:n_inputs
+    if strcmp(scaling_type{j},'linear')
+        a = "";
+        b = "";
+    elseif strcmp(scaling_type{j},'log')
+        a = "log10(";
+        b = ")";
+    elseif strcmp(scaling_type{j},'ln')
+        a = "log(";
+        b = ")";
+    end
+    
+    
+   line = var_scale+"("+num2str(j)+") = -1.D0 + 2.D0*("+a+var_in+"("+num2str(j)+")"+b+" - min_max("+num2str(j)+",1) )";
+   line = line+"/(min_max("+num2str(j)+",2) - min_max("+num2str(j)+",1))";
+   
+   f = {f{1:i},line,f{i+1:end}};
+   i=i+1;
+end
+
+f = {f{1:i},"! input scaling - end",f{i+1:end}};
+
+end
+
